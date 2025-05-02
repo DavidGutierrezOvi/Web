@@ -1,0 +1,290 @@
+{
+    "eventos": [
+      {
+        "id": 1,
+        "titulo": "Día de Convivencia",
+        "fecha": "2025-07-26T00:00:00",
+        "dia": "26",
+        "mes": "Jul",
+        "hora": "14:30",
+        "ubicacion": "Plaza de pueblo",
+        "descripcion": "Paella organizada por 'Arroces el valle' gratis para todos los socios",
+        "categoria": "convivencia"
+      },
+      {
+        "id": 2,
+        "titulo": "Barbacoa Nocturna",
+        "fecha": "2025-07-31T00:00:00",
+        "dia": "26",
+        "mes": "Jul",
+        "hora": "22:00",
+        "ubicacion": "Plaza del pueblo",
+        "descripcion": "Barbacoa organizada por la peña amenizada con un bingo y música",
+        "categoria": "convivencia"
+      },
+      {
+        "id": 3,
+        "titulo": "Montaje de la plaza",
+        "fecha": "2025-07-31T00:00:00",
+        "dia": "31",
+        "mes": "Jul",
+        "hora": "10:30",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 4,
+        "titulo": "Discoteca Movil 'Seven'",
+        "fecha": "2025-07-31T00:00:00",
+        "dia": "31",
+        "mes": "Jul",
+        "hora": "00:00",
+        "ubicacion": "Plaza de pueblo",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 5,
+        "titulo": "Concurso Dibujo Ifantil",
+        "fecha": "2025-08-01T00:00:00",
+        "dia": "1",
+        "mes": "Ago",
+        "hora": "12:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Concurso de dibujo infantil con premios para los gandores. Animate a participar",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 6,
+        "titulo": "Campeonato de Parchís mudo",
+        "fecha": "2025-08-01T00:00:00",
+        "dia": "1",
+        "mes": "Ago",
+        "hora": "18:00",
+        "ubicacion": "Casa de la Cultura",
+        "descripcion": "La primera partida debe estar jugada antes del Sábado a las 14:00, se jugará con 3 fichas hasta semifinales",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 7,
+        "titulo": "Pregón, sangría y elección de reyes y reinas",
+        "fecha": "2025-08-01T00:00:00",
+        "dia": "1",
+        "mes": "Ago",
+        "hora": "21:00",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 8,
+        "titulo": "Orquesta 'THE RIVER'",
+        "fecha": "2025-08-01T00:00:00",
+        "dia": "1",
+        "mes": "Ago",
+        "hora": "00:00",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 9,
+        "titulo": "Tirada de huevos",
+        "fecha": "2025-08-02T00:00:00",
+        "dia": "2",
+        "mes": "Ago",
+        "hora": "13:30",
+        "ubicacion": "Plaza",
+        "descripcion": "Tirada de huevos, para adultos y niños. ¿Cuanto podrás aguantar sin que se rompar el huevo?",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 10,
+        "titulo": "Campeonato de mus",
+        "fecha": "2025-08-02T00:00:00",
+        "dia": "2",
+        "mes": "Ago",
+        "hora": "20:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Se jugará al mejor de 5, cada juego a 30 fichas, a partir de semifinales se jugara a 3 vacas",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 11,
+        "titulo": "Juegos inantiles",
+        "fecha": "2025-08-02T00:00:00",
+        "dia": "2",
+        "mes": "Ago",
+        "hora": "18:30",
+        "ubicacion": "Plaza",
+        "descripcion": "Juegos para los mas pequeños amenizado con una merienda para todos los asistenes",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 12,
+        "titulo": "Orquesta 'SIROPE'",
+        "fecha": "2025-08-02T00:00:00",
+        "dia": "2",
+        "mes": "Ago",
+        "hora": "00:00",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 13,
+        "titulo": "Santa misa y procesión",
+        "fecha": "2025-08-03T00:00:00",
+        "dia": "3",
+        "mes": "Ago",
+        "hora": "12:00",
+        "ubicacion": "Iglesia",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 14,
+        "titulo": "Campeonato de tute",
+        "fecha": "2025-08-03T00:00:00",
+        "dia": "3",
+        "mes": "Ago",
+        "hora": "17:00",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 15,
+        "titulo": "Finales campeonatos",
+        "fecha": "2025-08-03T00:00:00",
+        "dia": "3",
+        "mes": "Ago",
+        "hora": "19:30",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 16,
+        "titulo": "Disfraces infantiles",
+        "fecha": "2025-08-03T00:00:00",
+        "dia": "3",
+        "mes": "Ago",
+        "hora": "21:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Ven disfrazado y disfruta con el resto de niños, se dará un regalo a todos los que participen",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 17,
+        "titulo": "Entrega de trofeos",
+        "fecha": "2025-08-03T00:00:00",
+        "dia": "3",
+        "mes": "Ago",
+        "hora": "22:30",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 18,
+        "titulo": "Baile de disfrazes",
+        "fecha": "2025-08-03T00:00:00",
+        "dia": "3",
+        "mes": "Ago",
+        "hora": "00:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Con la orquesta 'Grand Slam'. Ven disfrazado y pasalo en grandé con premios a los mejores disfrazes",
+        "categoria": "fiestas"
+      },
+      {
+        "id": 19,
+        "titulo": "Limpieza y recojida de la plaza",
+        "fecha": "2025-08-04T00:00:00",
+        "dia": "4",
+        "mes": "Ago",
+        "hora": "13:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Ayudanos a recojer y limpiar la plaza, las fiestas son de todos, también recogemos todos",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 20,
+        "titulo": "Concurso de repostería",
+        "fecha": "2025-08-05T00:00:00",
+        "dia": "5",
+        "mes": "Ago",
+        "hora": "22:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Todo lo recaudado irá donado al Reto de Pablo",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 21,
+        "titulo": "Partido soter@s contra casad@s",
+        "fecha": "2025-08-06T00:00:00",
+        "dia": "6",
+        "mes": "Ago",
+        "hora": "19:30",
+        "ubicacion": "Pistas de fútbol",
+        "descripcion": "Animate a jugar, lo pasaremos en grande",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 22,
+        "titulo": "Campeonato de fútbolín",
+        "fecha": "2025-08-06T00:00:00",
+        "dia": "6",
+        "mes": "Ago",
+        "hora": "23:00",
+        "ubicacion": "Bar Alcon",
+        "descripcion": "",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 23,
+        "titulo": "Concurso de pinchos",
+        "fecha": "2025-08-07T00:00:00",
+        "dia": "7",
+        "mes": "Ago",
+        "hora": "22:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Lo recaudado irá destinado para organizar las fiestas del año que viene",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 24,
+        "titulo": "Fiesta de mojitos",
+        "fecha": "2025-08-07T00:00:00",
+        "dia": "7",
+        "mes": "Ago",
+        "hora": "23:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Se harán mojitos en la plaza, todo ello animado con música",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 25,
+        "titulo": "Teatro",
+        "fecha": "2025-08-08T00:00:00",
+        "dia": "8",
+        "mes": "Ago",
+        "hora": "21:00",
+        "ubicacion": "Plaza",
+        "descripcion": "Teatro organizado por los mayores de nuestro pueblo, animate a venir, será muy divertido",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 26,
+        "titulo": "Campeonato de calva",
+        "fecha": "2025-08-09T00:00:00",
+        "dia": "9",
+        "mes": "Ago",
+        "hora": "19:00",
+        "ubicacion": "Río",
+        "descripcion": "Concurso para todos los miembros de la peña",
+        "categoria": "semana_cultural"
+      }
+    ]
+}

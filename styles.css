@@ -1,0 +1,1061 @@
+/* Variables de colores y fuentes */
+:root {
+    --primary-color: #6a0dad; /* Color morado principal */
+    --primary-light: rgba(106, 13, 173, 0.8); /* Morado con transparencia */
+    --primary-lighter: rgba(106, 13, 173, 0.1); /* Morado muy suave para fondos */
+    --secondary-color: #ffd700; /* Color amarillo */
+    --accent-color: #e63946;
+    --text-color: #333;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --font-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    width: 85%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+.botonamarillo{
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+/* Botones */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #e6c200;
+    transform: translateY(-2px);
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.btn-secondary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #d62b39;
+}
+
+/* Header y navegación */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-container h1 {
+    font-size: 1.8rem;
+    margin-right: 10px;
+}
+
+.nombre-pena {
+    color: var(--secondary-color); /* Nombre en amarillo */
+}
+
+.logo-icon {
+    font-size: 1.5rem;
+    color: var(--secondary-color);
+    display: none;
+}
+
+nav ul {
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 20px;
+}
+
+nav ul li a {
+    position: relative;
+    padding: 5px 0;
+    font-weight: 500;
+}
+
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--secondary-color);
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after,
+nav ul li a.active::after {
+    width: 100%;
+}
+
+/* Estilos para el cartel destacado en la página de fiestas */
+.cartel-destacado {
+    margin: 60px 0;
+    text-align: center;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    aspect-ratio: 2/3; /* Proporción típica de un cartel */
+}
+
+.cartel-destacado:hover {
+    transform: translateY(-5px);
+}
+
+.cartel-destacado img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cartel-year {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(106, 13, 173, 0.8); /* Fondo morado con transparencia */
+    color: var(--secondary-color); /* Texto amarillo */
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Estilos para el calendario de eventos */
+.calendario-eventos {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+}
+
+/* Navegación del calendario */
+.navegacion-calendario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn-mes-anterior,
+.btn-mes-siguiente {
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.btn-mes-anterior:hover,
+.btn-mes-siguiente:hover {
+    transform: translateY(-2px);
+}
+
+.mes-actual {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+    text-transform: capitalize;
+}
+
+/* Estilos para el calendario */
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 20px;
+    width: 100%;
+    overflow: visible;
+}
+
+/* Estilos para los días del calendario con mayor especificidad */
+.calendario-grid .dia {
+    position: relative;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+}
+
+.calendario-grid .dia:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+}
+
+.calendario-grid .dia.vacio {
+    background-color: transparent;
+    cursor: default;
+    border: none;
+}
+
+/* Estilos para días con eventos - mayor especificidad */
+.calendario-grid .dia.tiene-evento {
+    font-weight: bold;
+    position: relative;
+    transform: scale(1.05);
+    z-index: 1;
+    border-width: 2px;
+}
+
+/* Estilos específicos para cada categoría - mayor especificidad y !important */
+.calendario-grid .dia.categoria-convivencia {
+    background-color: rgba(76, 175, 80, 0.1) !important;
+    border: 2px solid #4CAF50 !important;
+}
+
+.calendario-grid .dia.categoria-fiestas {
+    background-color: rgba(33, 150, 243, 0.1) !important;
+    border: 2px solid #2196F3 !important;
+}
+
+.calendario-grid .dia.categoria-semana_cultural {
+    background-color: rgba(156, 39, 176, 0.1) !important;
+    border: 2px solid #9C27B0 !important;
+}
+
+/* Indicadores para cada categoría */
+.calendario-grid .dia.tiene-evento::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.calendario-grid .dia.categoria-convivencia::after {
+    background-color: #4CAF50;
+}
+
+.calendario-grid .dia.categoria-fiestas::after {
+    background-color: #2196F3;
+}
+
+.calendario-grid .dia.categoria-semana_cultural::after {
+    background-color: #9C27B0;
+}
+
+/* Efecto hover mejorado para días con eventos */
+.calendario-grid .dia.tiene-evento:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dia-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.evento-indicador {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+/* Estilos para la leyenda del calendario */
+.calendario-leyenda {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.leyenda-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.leyenda-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.leyenda-convivencia {
+    background-color: #4CAF50;
+}
+
+.leyenda-fiestas {
+    background-color: #2196F3;
+}
+
+.leyenda-semana-cultural {
+    background-color: #9C27B0;
+}
+
+.dia-semana {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    background-color: transparent;
+    color: var(--text-color);
+    border-radius: 4px;
+}
+
+.cartel-ampliado {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1100;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.cartel-ampliado.activo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cartel-ampliado img {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+    margin: 0 auto; /* Centrar horizontalmente */
+    transform: none; /* Evitar transformaciones no deseadas */
+}
+
+.cartel-ampliado .cerrar {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: var(--secondary-color);
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 1101;
+}
+
+.cartel-ampliado .year {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--secondary-color);
+    font-size: 24px;
+    font-weight: bold;
+    display: none;
+}
+
+.placeholder-image i {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--dark-color);
+}
+
+/* Event cards */
+.event-card {
+    display: flex;
+    background-color: rgb(240, 230, 247);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    transition: transform 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+}
+
+.event-card.destacado {
+    border: 2px solid var(--secondary-color);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    transform: translateY(-5px);
+}
+
+.event-date {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 100px;
+}
+
+.event-date .day {
+    font-size: 2rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.event-date .month {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+}
+
+.event-details {
+    padding: 20px;
+    flex: 1;
+}
+
+.event-details h3 {
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+}
+
+.event-location, .event-time {
+    color: var(--dark-color);
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.event-description {
+    margin: 15px 0;
+}
+
+/* Event filters */
+.event-filters {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background-color: transparent;
+    border: 2px solid var(--secondary-color);
+    color: var(--text-color);
+    padding: 8px 16px;
+    margin: 0 5px 10px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.dia-actual {
+    font-weight: bold;
+}
+/* Eventos day*/
+.eventos-dia {
+    margin-bottom: 50px;
+    overflow: hidden;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Estilo para el encabezado del día */
+.dia-header {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 10px;
+}
+
+.dia-numero {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #6a1b9a;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.mes-nombre {
+    font-size: 1rem;
+    color: #6a1b9a;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.tema-dia {
+    font-size: 1.2rem;
+    color: #6a1b9a;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.eventos-lista {
+    padding: 15px;
+}
+
+.evento-hora {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #f0f0f0;
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 1;
+}
+
+.hora {
+    background-color: #6a1b9a;
+    color: white;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: center;
+    width: 100%;
+}
+
+.evento-detalle {
+    padding: 15px 20px;
+    text-align: center;
+}
+
+.evento-hora:last-child {
+    border-bottom: none;
+}
+
+.evento-detalle h3 {
+    margin: 0 0 10px 0;
+    color: #6a1b9a;
+    font-size: 1.2rem;
+}
+
+.ubicacion {
+    color: #666;
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.ubicacion i {
+    color: #ff9800;
+    margin-right: 5px;
+}
+
+.descripcion {
+    margin: 10px 0 0 0;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Botón para volver al calendario */
+.volver-calendario {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.botonamarillo {
+    display: inline-block;
+    background-color: #ffeb3b;
+    color: #6a1b9a;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.botonamarillo:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.botonamarillo i {
+    margin-right: 8px;
+}
+
+/* Estilos para el mensaje de no eventos */
+.no-eventos {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: white;
+    border-radius: 10px;
+    margin: 30px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.no-eventos i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.no-eventos h3 {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.dias-navegacion {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    background-color: rgba(106, 27, 154, 0.8);
+    padding: 8px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.dia-btn {
+    background-color: transparent;
+    border: none;
+    padding: 6px 12px;
+    margin: 3px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.dia-btn:hover, .dia-btn.activo {
+    background-color: rgba(255, 235, 59, 0.9);
+    color: #6a1b9a;
+    transform: translateY(-2px);
+}
+
+.dia-btn.activo {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+/* Calendar */
+.calendar-placeholder {
+    background-color: #f0f0f0;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.calendar-placeholder i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: var(--dark-color);
+}
+
+/* Form placeholder */
+.form-placeholder {
+    background-color: #f0f0f0;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.form-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--dark-color);
+}
+
+/* Footer */
+footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 60px 0 20px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-section h3 {
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+/* Corregido el selector inválido */
+footer .footer-section:first-child h3 {
+    color: var(--secondary-color);
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.social-icons a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Page header */
+.page-header {
+    background-color: var(--primary-light);
+    color: white;
+    padding: 40px 0;
+    text-align: center;
+}
+
+/* Secciones con fondo - usar morado muy suave */
+.registration {
+    background-color: var(--primary-lighter);
+}
+.fiestas-anteriores {
+    padding: 60px 0;
+}
+
+.fiestas-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.cartel-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    aspect-ratio: 2/3; /* Proporción típica de un cartel */
+}
+
+.cartel-item:hover {
+    transform: translateY(-5px);
+}
+
+.cartel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Menú hamburguesa (oculto por defecto en pantallas grandes) */
+.menu-toggle {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+/* Estilos para la sección de eventos del día */
+.dias-navegacion {
+    background-color: var(--primary-lighter);
+    padding: 15px 0;
+    position: sticky;
+    top: 70px;
+    z-index: 900;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+}
+
+.dia-nav-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 0 5px;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border-radius: 30px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.dia-nav-btn:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    transform: translateY(-3px);
+}
+
+.eventos-dia {
+    padding: 60px 0;
+    border-bottom: 1px solid rgba(106, 13, 173, 0.2);
+}
+
+.eventos-dia:nth-child(odd) {
+    background-color: var(--primary-lighter);
+}
+
+.fecha-grande {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dia-numero {
+    font-size: 4rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.mes-nombre {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    text-transform: uppercase;
+}
+
+.dia-header h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.eventos-lista {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.evento-hora {
+    display: flex;
+    margin-bottom: 30px;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.evento-hora:hover {
+    transform: translateY(-5px);
+}
+
+.hora {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 100px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.evento-detalle {
+    padding: 20px;
+    flex: 1;
+}
+
+.evento-detalle h3 {
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+    color: var(--primary-color);
+}
+
+.ubicacion {
+    color: var(--dark-color);
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.descripcion {
+    margin: 15px 0;
+    line-height: 1.5;
+}
+
+.volver-calendario {
+    text-align: center;
+    margin: 40px 0;
+}
+
+/* Estilos para la sección de historia */
+.historia-contenido {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+    align-items: center;
+}
+
+.historia-imagen {
+    flex: 1;
+    min-width: 300px;
+    padding: 15px;
+}
+
+.historia-imagen img {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.historia-texto {
+    flex: 2;
+    min-width: 300px;
+    padding: 15px;
+}
+
+.historia-texto h2 {
+    color: #6a1b9a;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.historia-texto p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 768px) {
+    .historia-contenido {
+        flex-direction: column;
+    }
+    
+    .evento-hora {
+        flex-direction: column;
+    }
+    
+    .hora {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .dia-numero {
+        font-size: 3rem;
+    }
+    
+    .dia-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .dias-navegacion {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px 0;
+    }
+    
+    .dia-nav-btn {
+        margin-bottom: 5px;
+    }
+    
+    .fiestas-gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+    
+    nav {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: var(--primary-color);
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    
+    nav.active {
+        max-height: 300px;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    nav ul li {
+        margin: 10px 0;
+    }
+}
+
+
+

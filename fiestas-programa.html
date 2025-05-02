@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programa de Fiestas - Peña El Cuervo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos generales para la página de programa de fiestas */
+        body {
+            background-color: #f5f0ff;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .page-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 10px 0 0;
+            font-size: 1.2rem;
+        }
+        
+       
+    </style>
+</head>
+<body>
+    <!-- Header y navegación -->
+    <header>
+        <div class="logo-container">
+            <h1><span class="nombre-pena"> Peña El Cuervo</span></h1>
+            <div class="logo-icon"><i class="fas fa-crow"></i></div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="fiestas.html">Fiestas</a></li>
+                <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+            </ul>
+        </nav>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- Encabezado de página -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Programa de Fiestas 2025</h1>
+            <p>31 de Julio - 3 de Agosto</p>
+        </div>
+    </div>
+
+    <!-- Contenedor para los eventos del programa de fiestas -->
+    <section id="programa-fiestas">
+        <div class="container">
+            <!-- Navegación por días -->
+            <div class="dias-navegacion">
+                <!-- Se llenará dinámicamente con los días disponibles -->
+            </div>
+            
+            <!-- Los eventos se cargarán dinámicamente desde el JSON -->
+            <div id="programa-container" class="loading-container" style="text-align: center; padding: 50px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #6a1b9a;"></i>
+                <p>Cargando eventos...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botón para volver al calendario -->
+    <div class="volver-calendario container">
+        <a href="fiestas.html" class="botonamarillo">
+            <i class="fas fa-calendar-alt"></i> Volver al Calendario
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Peña El Cuervo</h3>
+                    <p>Tu lugar de encuentro para celebrar, compartir y disfrutar.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="fiestas.html">Fiestas</a></li>
+                        <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Plaza Mayor, s/n</p>
+                    <p><i class="fas fa-phone"></i> +34 123 456 789</p>
+                    <p><i class="fas fa-envelope"></i> info@penaelcuervo.es</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Peña El Cuervo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script para cargar eventos desde el JSON existente -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar el archivo eventos.json desde la carpeta data
+        fetch('data/eventos.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el archivo de eventos');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Acceder a la propiedad "eventos" del objeto JSON
+                const eventos = data.eventos;
+                
+                // Filtrar eventos para mostrar SOLO los de categoría fiestas
+                const eventosFiestas = eventos.filter(evento => 
+                    evento.categoria === 'fiestas'
+                );
+                
+                // Organizar eventos por día
+                const eventosPorDia = agruparEventosPorDia(eventosFiestas);
+                
+                // Crear navegación por días
+                crearNavegacionDias(eventosPorDia);
+                
+                // Mostrar todos los eventos inicialmente
+                mostrarTodosLosEventos(eventosPorDia);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('programa-container').innerHTML = `
+                    <div class="no-eventos">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error al cargar los eventos</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            });
+    });
+
+    // Función para agrupar eventos por día
+    function agruparEventosPorDia(eventos) {
+        const eventosPorDia = {};
+        
+        eventos.forEach(evento => {
+            const fechaKey = `${evento.dia}-${evento.mes}`;
+            
+            if (!eventosPorDia[fechaKey]) {
+                eventosPorDia[fechaKey] = {
+                    dia: evento.dia,
+                    mes: evento.mes,
+                    eventos: []
+                };
+            }
+            
+            eventosPorDia[fechaKey].eventos.push(evento);
+        });
+        
+        // Ordenar eventos por hora dentro de cada día
+        for (const dia in eventosPorDia) {
+            eventosPorDia[dia].eventos.sort((a, b) => {
+                // Convertir horas a números para comparar (00:00 debe ser considerado como 24:00)
+                const horaA = a.hora === '00:00' ? '24:00' : a.hora;
+                const horaB = b.hora === '00:00' ? '24:00' : b.hora;
+                return horaA.localeCompare(horaB);
+            });
+        }
+        
+        return eventosPorDia;
+    }
+
+    // Función para crear la navegación por días
+    function crearNavegacionDias(eventosPorDia) {
+        const navegacionContainer = document.querySelector('.dias-navegacion');
+        let html = `<button class="dia-btn activo" data-dia="todos">Todos los días</button>`;
+        
+        // Ordenar los días
+        const dias = Object.keys(eventosPorDia).sort((a, b) => {
+            const [diaA, mesA] = a.split('-');
+            const [diaB, mesB] = b.split('-');
+            
+            // Primero comparar por mes
+            const mesesOrden = {'Jul': 1, 'Ago': 2};
+            if (mesesOrden[mesA] !== mesesOrden[mesB]) {
+                return mesesOrden[mesA] - mesesOrden[mesB];
+            }
+            
+            // Si el mes es el mismo, comparar por día
+            return parseInt(diaA) - parseInt(diaB);
+        });
+        
+        // Crear botones para cada día
+        dias.forEach(diaKey => {
+            const info = eventosPorDia[diaKey];
+            html += `<button class="dia-btn" data-dia="${diaKey}">${info.dia} ${info.mes}</button>`;
+        });
+        
+        navegacionContainer.innerHTML = html;
+        
+        // Añadir eventos a los botones
+        document.querySelectorAll('.dia-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Quitar clase activo de todos los botones
+                document.querySelectorAll('.dia-btn').forEach(b => b.classList.remove('activo'));
+                
+                // Añadir clase activo al botón clickeado
+                this.classList.add('activo');
+                
+                const diaSeleccionado = this.getAttribute('data-dia');
+                
+                if (diaSeleccionado === 'todos') {
+                    mostrarTodosLosEventos(eventosPorDia);
+                } else {
+                    mostrarEventosDia(eventosPorDia[diaSeleccionado]);
+                }
+            });
+        });
+    }
+
+    // Función para mostrar todos los eventos
+    function mostrarTodosLosEventos(eventosPorDia) {
+        const contenedor = document.getElementById('programa-container');
+        
+        // Si no hay eventos
+        if (Object.keys(eventosPorDia).length === 0) {
+            contenedor.innerHTML = `
+                <div class="no-eventos">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No hay eventos programados</h3>
+                    <p>Todavía no hay eventos para las fiestas.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        // Ordenar los días
+        const dias = Object.keys(eventosPorDia).sort((a, b) => {
+            const [diaA, mesA] = a.split('-');
+            const [diaB, mesB] = b.split('-');
+            
+            // Primero comparar por mes
+            const mesesOrden = {'Jul': 1, 'Ago': 2};
+            if (mesesOrden[mesA] !== mesesOrden[mesB]) {
+                return mesesOrden[mesA] - mesesOrden[mesB];
+            }
+            
+            // Si el mes es el mismo, comparar por día
+            return parseInt(diaA) - parseInt(diaB);
+        });
+        
+        // Crear contenedor para cada día
+        dias.forEach(diaKey => {
+            const infoDia = eventosPorDia[diaKey];
+            
+            html += crearHTMLDia(infoDia);
+        });
+        
+        contenedor.innerHTML = html;
+    }
+
+    // Función para mostrar eventos de un día específico
+    function mostrarEventosDia(infoDia) {
+        const contenedor = document.getElementById('programa-container');
+        contenedor.innerHTML = crearHTMLDia(infoDia);
+    }
+
+    // Función para crear el HTML de un día
+    function crearHTMLDia(infoDia) {
+        // Convertir abreviatura del mes a nombre completo
+        let nombreMesCompleto = infoDia.mes;
+        if (nombreMesCompleto === 'Ago') {
+            nombreMesCompleto = 'Agosto';
+        } else if (nombreMesCompleto === 'Jul') {
+            nombreMesCompleto = 'Julio';
+        }
+        
+        let html = `
+            <div class="eventos-dia">
+                <div class="dia-header">
+                    <div class="dia-numero">${infoDia.dia}</div>
+                    <div class="mes-nombre">${nombreMesCompleto}</div>
+                </div>
+                <div class="eventos-lista">
+        `;
+        
+        // Agregar cada evento
+        infoDia.eventos.forEach(evento => {
+            html += `
+                <div class="evento-hora">
+                    <div class="hora">${evento.hora || '00:00'}</div>
+                    <div class="evento-detalle">
+                        <h3>${evento.titulo}</h3>
+                        ${evento.ubicacion ? `<p class="ubicacion"><i class="fas fa-map-marker-alt"></i> ${evento.ubicacion}</p>` : ''}
+                        ${evento.descripcion ? `<p class="descripcion">${evento.descripcion}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        return html;
+    }
+    </script>
+</body>
+</html>

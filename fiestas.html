@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiestas - Peña El Cuervo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header y navegación -->
+    <header>
+        <div class="logo-container">
+            <h1><span class="nombre-pena"> Peña El Cuervo</span></h1>
+            <div class="logo-icon"><i class="fas fa-crow"></i></div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="fiestas.html" class="active">Fiestas</a></li>
+                <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+            </ul>
+        </nav>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- Encabezado de página -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Fiestas 2024</h1>
+            <p>Descubre todos los eventos y actividades de nuestras fiestas</p>
+        </div>
+    </div>
+
+    <!-- Sección del cartel y calendario -->
+    <section class="fiestas-actuales">
+        <div class="container">
+            <!-- Cartel destacado -->
+            <div class="cartel-destacado">
+                <img src="img/carteles/cartel2024.jpeg" alt="Cartel Fiestas 2024">
+                <div class="cartel-year">2024</div>
+            </div>
+            
+            <!-- Calendario de eventos -->
+            <div class="calendario-eventos">
+                <div class="navegacion-calendario">
+                    <button class="btn-mes-anterior"><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <div class="mes-actual">Julio 2024</div>
+                    <button class="btn-mes-siguiente">Siguiente <i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <div class="calendario-grid">
+                    <!-- Los días se cargarán dinámicamente con JavaScript -->
+                </div>
+                
+                <div class="calendario-leyenda">
+                    <div class="leyenda-item">
+                        <div class="leyenda-color leyenda-convivencia"></div>
+                        <span>Día de Convivencia</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <div class="leyenda-color leyenda-fiestas"></div>
+                        <span>Fiestas</span>
+                    </div>
+                    <div class="leyenda-item">
+                        <div class="leyenda-color leyenda-semana-cultural"></div>
+                        <span>Semana Cultural</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Peña El Cuervo</h3>
+                <p>Tradición, cultura y diversión en nuestras fiestas desde hace más de 30 años.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Dirección de la Peña</p>
+                <p><i class="fas fa-envelope"></i> info@penacuervo.es</p>
+                <p><i class="fas fa-phone"></i> (123) 456-7890</p>
+            </div>
+            <div class="footer-section">
+                <h3>Síguenos</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Peña El Cuervo. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Lightbox para el cartel ampliado -->
+<div class="cartel-ampliado">
+    <div class="cerrar">&times;</div>
+    <img src="" alt="Cartel ampliado">
+    <div class="year"></div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

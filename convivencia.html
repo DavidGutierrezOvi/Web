@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Día de Convivencia - Peña El Cuervo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos generales para la página de convivencia */
+        body {
+            background-color: #f5f0ff;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .page-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 10px 0 0;
+            font-size: 1.2rem;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <!-- Header y navegación -->
+    <header>
+        <div class="logo-container">
+            <h1><span class="nombre-pena"> Peña El Cuervo</span></h1>
+            <div class="logo-icon"><i class="fas fa-crow"></i></div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="fiestas.html">Fiestas</a></li>
+                <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+            </ul>
+        </nav>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- Encabezado de página -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Día de Convivencia 2025</h1>
+            <p>26 de Julio</p>
+        </div>
+    </div>
+
+    <!-- Contenedor para los eventos del día de convivencia -->
+    <section id="convivencia">
+        <div class="container">
+            <!-- Los eventos se cargarán dinámicamente desde el JSON -->
+            <div id="programa-container" class="loading-container" style="text-align: center; padding: 50px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #6a1b9a;"></i>
+                <p>Cargando eventos...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botón para volver al calendario -->
+    <div class="volver-calendario container">
+        <a href="fiestas.html" class="botonamarillo">
+            <i class="fas fa-calendar-alt"></i> Volver al Calendario
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Peña El Cuervo</h3>
+                    <p>Tu lugar de encuentro para celebrar, compartir y disfrutar.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="fiestas.html">Fiestas</a></li>
+                        <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Plaza Mayor, s/n</p>
+                    <p><i class="fas fa-phone"></i> +34 123 456 789</p>
+                    <p><i class="fas fa-envelope"></i> info@penaelcuervo.es</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Peña El Cuervo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script para cargar eventos desde el JSON existente -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar el archivo eventos.json desde la carpeta data
+        fetch('data/eventos.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar el archivo de eventos');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Acceder a la propiedad "eventos" del objeto JSON
+                const eventos = data.eventos;
+                
+                // Filtrar eventos para mostrar SOLO los de categoría convivencia
+                const eventosConvivencia = eventos.filter(evento => 
+                    evento.categoria === 'convivencia'
+                );
+                
+                // Mostrar los eventos de convivencia
+                mostrarEventosConvivencia(eventosConvivencia);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('programa-container').innerHTML = `
+                    <div class="no-eventos">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error al cargar los eventos</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            });
+    });
+
+    // Función para mostrar los eventos de convivencia
+    function mostrarEventosConvivencia(eventos) {
+        const contenedor = document.getElementById('programa-container');
+        
+        // Si no hay eventos
+        if (eventos.length === 0) {
+            contenedor.innerHTML = `
+                <div class="no-eventos">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No hay eventos programados</h3>
+                    <p>Todavía no hay eventos para el día de convivencia.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Ordenar eventos por hora
+        eventos.sort((a, b) => {
+            // Convertir horas a números para comparar (00:00 debe ser considerado como 24:00)
+            const horaA = a.hora === '00:00' ? '24:00' : a.hora;
+            const horaB = b.hora === '00:00' ? '24:00' : b.hora;
+            return horaA.localeCompare(horaB);
+        });
+        
+        // Crear el HTML para el día de convivencia
+        let html = `
+            <div class="eventos-dia">
+                <div class="dia-header">
+                    <div class="dia-numero">26</div>
+                    <div class="mes-nombre">Julio</div>
+                    <div class="tema-dia">Día de Convivencia</div>
+                </div>
+                <div class="eventos-lista">
+        `;
+        
+        // Agregar cada evento
+        eventos.forEach(evento => {
+            html += `
+                <div class="evento-hora">
+                    <div class="hora">${evento.hora || '00:00'}</div>
+                    <div class="evento-detalle">
+                        <h3>${evento.titulo}</h3>
+                        ${evento.ubicacion ? `<p class="ubicacion"><i class="fas fa-map-marker-alt"></i> ${evento.ubicacion}</p>` : ''}
+                        ${evento.descripcion ? `<p class="descripcion">${evento.descripcion}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        contenedor.innerHTML = html;
+    }
+    </script>
+</body>
+</html>
+
+    
