@@ -25,7 +25,7 @@ body {
 }
 
 .container {
-    width: 85%;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -209,7 +209,7 @@ nav ul li a.active::after {
     padding: 8px 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
     font-weight: bold;
 }
 
@@ -987,6 +987,8 @@ footer .footer-section:first-child h3 {
 
 /* Ajustes para dispositivos móviles */
 @media (max-width: 768px) {
+   
+
     .historia-contenido {
         flex-direction: column;
     }
@@ -1055,7 +1057,96 @@ footer .footer-section:first-child h3 {
     nav ul li {
         margin: 10px 0;
     }
+
+    
+    .calendario-eventos {
+        background-color: transparent;
+        box-shadow: none;
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .navegacion-calendario {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+    
+    .calendario-grid {
+        width: 100%;
+        min-width: 100%;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 5px;
+        margin-bottom: 5px;
+        border-radius: 0;
+        overflow-x: visible;
+    }
+    
+    .calendario-leyenda {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 0 0 8px 8px;
+        width: 100%;
+    }
+    
+    .calendario-grid .dia {
+        font-size: 0.75rem;
+        padding: 2px;
+        min-height: 30px;
+        width: 100%;
+    }
+    
+    .container {
+        width: 95%;
+    }
+    
+    /* Asegurar que las imágenes no se desborden */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Ajustar el tamaño de los elementos del calendario */
+    .calendario-grid .dia-semana {
+        font-size: 0.7rem;
+        padding: 3px;
+    }
+
+    .cartel-destacado {
+        max-width: 250px;
+        margin: 30px auto;
+    }
+    
+    .cartel-year {
+        font-size: 1rem;
+        padding: 8px;
+    }
+
+    .btn-mes-anterior,
+    .btn-mes-siguiente {
+    background-color: transparent;
+    color: var(--text-color);
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.5rem;
+    font-weight: bold;
+    }
+
+    .btn-mes-anterior:hover,
+    .btn-mes-siguiente:hover {
+    transform: translateY(-2px);
+    }
 }
 
-
-
+/* Asegurar que todos los elementos se ajusten al ancho de la pantalla */
+img, video, iframe, table, div {
+    max-width: 100%;
+}
