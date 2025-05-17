@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
+ * Verifica si un valor está definido y válido (no es null ni undefined ni el string "undefined")
+ * @param {any} value - Valor a verificar
+ * @returns {boolean} - true si el valor es válido, false en caso contrario
+ */
+function isValidValue(value) {
+    return value !== null && value !== undefined && value !== "undefined";
+}
+
+/**
  * Carga los datos de campeonatos desde Firebase
  */
 function cargarDatosCampeonatos() {
@@ -276,26 +285,51 @@ function buscarOrigenRival(campeonato, rondaActual, partidoActual, posicionRival
     // No hay ronda anterior
     if (!campeonato[rondaAnterior]) return null;
     
+    // Imprimimos logs para depuración
+    console.log("Buscando origen del rival:");
+    console.log("- Ronda actual:", rondaActual);
+    console.log("- Partido actual:", partidoActual);
+    console.log("- Posición rival:", posicionRival);
+    console.log("- Ronda anterior:", rondaAnterior);
+    console.log("- Partidos en ronda anterior:", campeonato[rondaAnterior].length);
+    
     // Calcular el índice del partido en la ronda anterior
     // Si estamos buscando p1, el partido anterior es partidoActual*2
     // Si estamos buscando p2, el partido anterior es partidoActual*2+1
-    const partidoAnteriorIndice = posicionRival === 'p1' ? partidoActual * 2 : partidoActual * 2 + 1;
+    let partidoAnteriorIndice = posicionRival === 'p1' ? partidoActual * 2 : partidoActual * 2 + 1;
     
     // Verificar si existe ese partido en la ronda anterior
-    if (!campeonato[rondaAnterior][partidoAnteriorIndice]) return null;
+    if (!campeonato[rondaAnterior][partidoAnteriorIndice]) {
+        console.log("ERROR: El índice calculado está fuera de rango:", partidoAnteriorIndice);
+        
+        // Si el índice calculado está fuera de rango, probamos con una fórmula alternativa
+        // En algunos torneos la relación puede ser diferente
+        partidoAnteriorIndice = Math.floor(partidoActual / 2);
+        console.log("Probando con índice alternativo:", partidoAnteriorIndice);
+        
+        if (!campeonato[rondaAnterior][partidoAnteriorIndice]) {
+            console.log("ERROR: Tampoco se encontró con el índice alternativo");
+            return null;
+        }
+    }
     
     const partidoAnterior = campeonato[rondaAnterior][partidoAnteriorIndice];
+    console.log("Partido anterior encontrado:", partidoAnterior);
     
     // Asegurarnos de que el partido anterior existe y tiene la estructura correcta
     if (!partidoAnterior) return null;
+    
+    // Verificar y corregir p1 y p2 si son "undefined"
+    if (partidoAnterior.p1 === "undefined") partidoAnterior.p1 = null;
+    if (partidoAnterior.p2 === "undefined") partidoAnterior.p2 = null;
     
     return {
         ronda: rondaAnterior,
         indice: partidoAnteriorIndice,
         partido: partidoAnterior,
-        equipo1: partidoAnterior.p1 !== undefined ? partidoAnterior.p1 : null,
-        equipo2: partidoAnterior.p2 !== undefined ? partidoAnterior.p2 : null,
-        posicion: 'p1' // El ganador del partido anterior siempre va a la posición p1 o p2 del siguiente
+        equipo1: partidoAnterior.p1,
+        equipo2: partidoAnterior.p2,
+        posicion: posicionRival
     };
 }
 
@@ -362,7 +396,7 @@ function buscarPareja() {
                         `;
                         
                         // Si el rival está determinado
-                        if (rival !== null && rival !== undefined) {
+                        if (isValidValue(rival)) {
                             const parejaRival = parejas[rival];
                             if (parejaRival) {
                                 html += `<p><strong>Rival:</strong> #${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
@@ -388,7 +422,7 @@ function buscarPareja() {
                                 
                                 // Información de las parejas del partido anterior
                                 let pareja1Info = 'Por definir';
-                                if (partidoAnterior.p1 !== null && partidoAnterior.p1 !== undefined) {
+                                if (isValidValue(partidoAnterior.p1)) {
                                     const p1 = parejas[partidoAnterior.p1];
                                     if (p1) {
                                         pareja1Info = `#${partidoAnterior.p1} - ${p1.nombre1 || ''} / ${p1.nombre2 || ''}`;
@@ -398,7 +432,7 @@ function buscarPareja() {
                                 }
                                 
                                 let pareja2Info = 'Por definir';
-                                if (partidoAnterior.p2 !== null && partidoAnterior.p2 !== undefined) {
+                                if (isValidValue(partidoAnterior.p2)) {
                                     const p2 = parejas[partidoAnterior.p2];
                                     if (p2) {
                                         pareja2Info = `#${partidoAnterior.p2} - ${p2.nombre1 || ''} / ${p2.nombre2 || ''}`;
@@ -413,8 +447,8 @@ function buscarPareja() {
                                     <div class="rival-info" style="background:#f5f5f5; padding:10px; border-radius:5px; margin-top:10px;">
                                         <p><i class="fas fa-info-circle"></i> <strong>Tu rival saldrá de la partida entre:</strong></p>
                                         <ul style="margin-top: 5px; padding-left: 20px;">
-                                            <li>Pareja ${partidoAnterior.p1 !== null && partidoAnterior.p1 !== undefined ? pareja1Info : 'Por definir'}</li>
-                                            <li>Pareja ${partidoAnterior.p2 !== null && partidoAnterior.p2 !== undefined ? pareja2Info : 'Por definir'}</li>
+                                            <li>Pareja ${isValidValue(partidoAnterior.p1) ? pareja1Info : 'Por definir'}</li>
+                                            <li>Pareja ${isValidValue(partidoAnterior.p2) ? pareja2Info : 'Por definir'}</li>
                                         </ul>
                                         <p style="margin-top: 5px;">El partido entre estas parejas ${estadoPartidoAnterior}.</p>
                                     </div>
@@ -466,7 +500,7 @@ function buscarPareja() {
                                 <p><strong>Tu pareja:</strong> #${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
                             `;
                             
-                            if (rival !== null && rival !== undefined) {
+                            if (isValidValue(rival)) {
                                 const parejaRival = parejas[rival];
                                 if (parejaRival) {
                                     html += `<p><strong>Rival:</strong> #${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
