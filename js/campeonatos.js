@@ -38,6 +38,16 @@ function cargarDatosCampeonatos() {
             datos: { mus: {}, tute: {}, parchis: {} }
         };
         
+        // Asegurarse de que todas las estructuras necesarias existen
+        if (!data.parejas) data.parejas = { mus: {}, tute: {}, parchis: {} };
+        if (!data.datos) data.datos = { mus: {}, tute: {}, parchis: {} };
+        if (!data.parejas.mus) data.parejas.mus = {};
+        if (!data.parejas.tute) data.parejas.tute = {};
+        if (!data.parejas.parchis) data.parejas.parchis = {};
+        if (!data.datos.mus) data.datos.mus = {};
+        if (!data.datos.tute) data.datos.tute = {};
+        if (!data.datos.parchis) data.datos.parchis = {};
+        
         // Generar árboles de campeonatos
         generarArbolCampeonato('mus', data);
         generarArbolCampeonato('tute', data);
@@ -63,8 +73,21 @@ function cargarDatosCampeonatos() {
  */
 function generarArbolCampeonato(tipo, data) {
     const bracket = document.getElementById(`${tipo}-bracket`);
+    
+    // Verificar que las estructuras de datos existan
+    if (!data || !data.datos || !data.parejas || !data.datos[tipo] || !data.parejas[tipo]) {
+        bracket.innerHTML = `
+            <div class="no-campeonato" style="text-align: center; padding: 20px;">
+                <i class="fas fa-calendar-times" style="font-size: 2rem; color: #757575;"></i>
+                <h3>No hay campeonato disponible</h3>
+                <p>Todavía no se ha configurado el campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</p>
+            </div>
+        `;
+        return;
+    }
+    
     const campeonato = data.datos[tipo];
-    const parejas = data.parejas[tipo];
+    const parejas = data.parejas[tipo] || {};
     
     if (!campeonato || Object.keys(campeonato).length === 0) {
         bracket.innerHTML = `

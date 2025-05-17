@@ -46,10 +46,48 @@ function cargarDatosCampeonatos() {
     const campeonatosRef = database.ref('campeonatos');
     
     campeonatosRef.on('value', (snapshot) => {
-        const data = snapshot.val() || {
-            parejas: { mus: {}, tute: {}, parchis: {} },
-            datos: { mus: {}, tute: {}, parchis: {} }
-        };
+        console.log('Datos cargados desde Firebase:', snapshot.val());
+        
+        // Si no hay datos, inicializar la estructura
+        if (!snapshot.exists()) {
+            console.log('Inicializando estructura de datos en Firebase');
+            // Crear la estructura básica
+            const datosIniciales = {
+                parejas: {
+                    mus: {},
+                    tute: {},
+                    parchis: {}
+                },
+                datos: {
+                    mus: {},
+                    tute: {},
+                    parchis: {}
+                }
+            };
+            
+            database.ref('campeonatos').set(datosIniciales)
+                .then(() => {
+                    console.log('Estructura inicial creada en Firebase');
+                    return;
+                })
+                .catch(error => {
+                    console.error('Error al crear estructura inicial:', error);
+                });
+            
+            return;
+        }
+        
+        const data = snapshot.val();
+        
+        // Asegurarse de que todas las estructuras necesarias existen
+        if (!data.parejas) data.parejas = { mus: {}, tute: {}, parchis: {} };
+        if (!data.datos) data.datos = { mus: {}, tute: {}, parchis: {} };
+        if (!data.parejas.mus) data.parejas.mus = {};
+        if (!data.parejas.tute) data.parejas.tute = {};
+        if (!data.parejas.parchis) data.parejas.parchis = {};
+        if (!data.datos.mus) data.datos.mus = {};
+        if (!data.datos.tute) data.datos.tute = {};
+        if (!data.datos.parchis) data.datos.parchis = {};
         
         // Cargar parejas y partidos para cada tipo de campeonato
         cargarParejas('mus', data.parejas.mus);
@@ -60,7 +98,7 @@ function cargarDatosCampeonatos() {
         cargarPartidas('tute', data);
         cargarPartidas('parchis', data);
     }, (error) => {
-        console.error('Error:', error);
+        console.error('Error al cargar datos:', error);
         mostrarError('Error al cargar los datos de campeonatos: ' + error.message);
     });
 }
@@ -120,12 +158,38 @@ function cargarParejas(tipo, parejas) {
  * @param {Object} data - Datos completos de campeonatos
  */
 function cargarPartidas(tipo, data) {
+    console.log(`Cargando partidas de ${tipo}`, data);
     const contenedor = document.getElementById(`partidas-${tipo}`);
-    const campeonato = data.datos[tipo];
-    const parejas = data.parejas[tipo];
     
-    // Si no hay partidas
+    // Verificar que las estructuras de datos existan
+    if (!data || !data.datos || !data.parejas || !data.datos[tipo]) {
+        console.log(`No hay datos para el campeonato de ${tipo}`);
+        // No hay datos del campeonato, mostrar botón de crear
+        contenedor.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                No hay partidas configuradas
+                <div class="mt-3">
+                    <button id="crear-campeonato-${tipo}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Campeonato
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Añadir event listener para crear campeonato
+        document.getElementById(`crear-campeonato-${tipo}`).addEventListener('click', function() {
+            crearCampeonato(tipo);
+        });
+        
+        return;
+    }
+    
+    const campeonato = data.datos[tipo];
+    const parejas = data.parejas[tipo] || {};
+    
+    // Si no hay partidas o el campeonato está vacío
     if (!campeonato || Object.keys(campeonato).length === 0) {
+        console.log(`Campeonato de ${tipo} sin partidas`);
         contenedor.innerHTML = `
             <div style="text-align: center; padding: 20px;">
                 No hay partidas configuradas
