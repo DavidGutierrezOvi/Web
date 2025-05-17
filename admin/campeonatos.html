@@ -99,6 +99,36 @@
             background-color: #c62828;
             color: white;
         }
+        
+        /* Estilos específicos para los botones de crear campeonato */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-4 {
+            margin-bottom: 20px;
+        }
+        
+        #crear-campeonato-mus, 
+        #crear-campeonato-tute, 
+        #crear-campeonato-parchis {
+            display: inline-block;
+            font-size: 16px;
+            padding: 12px 20px;
+            background-color: #6a1b9a;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        #crear-campeonato-mus:hover, 
+        #crear-campeonato-tute:hover, 
+        #crear-campeonato-parchis:hover {
+            background-color: #4a148c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
 
         table {
             width: 100%;
@@ -169,8 +199,58 @@
                 margin-top: 10px;
                 justify-content: flex-end;
             }
+            
+            .admin-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+            
+            .admin-tab {
+                padding: 8px 15px;
+                font-size: 0.95rem;
+                flex-shrink: 0;
+            }
+            
+            .admin-header h1 {
+                font-size: 2rem;
+            }
+            
+            .admin-header p {
+                font-size: 1rem;
+            }
+            
+            .admin-container {
+                padding: 15px 10px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.95rem;
+            }
+            
+            .form-group {
+                margin-bottom: 10px;
+            }
+            
+            .form-control {
+                font-size: 0.95rem;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
         }
     </style>
+    <!-- Bibliotecas para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <!-- Header y navegación -->
@@ -245,6 +325,11 @@
 
             <div class="admin-container">
                 <h2>Gestionar Partidas - Mus</h2>
+                <div class="text-center mb-4">
+                    <button id="crear-campeonato-mus" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Campeonato de Mus
+                    </button>
+                </div>
                 <div id="partidas-mus">
                     <!-- Las partidas se cargarán dinámicamente -->
                 </div>
@@ -288,6 +373,11 @@
 
             <div class="admin-container">
                 <h2>Gestionar Partidas - Tute</h2>
+                <div class="text-center mb-4">
+                    <button id="crear-campeonato-tute" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Campeonato de Tute
+                    </button>
+                </div>
                 <div id="partidas-tute">
                     <!-- Las partidas se cargarán dinámicamente -->
                 </div>
@@ -331,6 +421,11 @@
 
             <div class="admin-container">
                 <h2>Gestionar Partidas - Parchís</h2>
+                <div class="text-center mb-4">
+                    <button id="crear-campeonato-parchis" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Campeonato de Parchís
+                    </button>
+                </div>
                 <div id="partidas-parchis">
                     <!-- Las partidas se cargarán dinámicamente -->
                 </div>
@@ -379,5 +474,56 @@
     </script>
 
     <script src="../js/admin-campeonatos.js"></script>
+    
+    <!-- Script adicional para configurar botones -->
+    <script>
+        // Asegurarse de que los botones de crear campeonato están configurados
+        window.addEventListener('load', function() {
+            console.log('Configurando manualmente botones de crear campeonato...');
+            
+            // Verificar si existen los botones
+            const btnMus = document.getElementById('crear-campeonato-mus');
+            const btnTute = document.getElementById('crear-campeonato-tute');
+            const btnParchis = document.getElementById('crear-campeonato-parchis');
+            
+            console.log('Botón Mus:', btnMus);
+            console.log('Botón Tute:', btnTute);
+            console.log('Botón Parchís:', btnParchis);
+            
+            // Configurar event listeners si existen los botones
+            if (btnMus) {
+                btnMus.addEventListener('click', function() {
+                    console.log('Botón Crear Campeonato Mus clickeado');
+                    if (typeof crearCampeonato === 'function') {
+                        crearCampeonato('mus');
+                    } else {
+                        alert('La función crearCampeonato no está definida');
+                    }
+                });
+            }
+            
+            if (btnTute) {
+                btnTute.addEventListener('click', function() {
+                    console.log('Botón Crear Campeonato Tute clickeado');
+                    if (typeof crearCampeonato === 'function') {
+                        crearCampeonato('tute');
+                    } else {
+                        alert('La función crearCampeonato no está definida');
+                    }
+                });
+            }
+            
+            if (btnParchis) {
+                btnParchis.addEventListener('click', function() {
+                    console.log('Botón Crear Campeonato Parchís clickeado');
+                    if (typeof crearCampeonato === 'function') {
+                        crearCampeonato('parchis');
+                    } else {
+                        alert('La función crearCampeonato no está definida');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

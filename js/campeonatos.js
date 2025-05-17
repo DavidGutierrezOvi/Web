@@ -100,6 +100,17 @@ function generarArbolCampeonato(tipo, data) {
         return;
     }
 
+    // Asegurarse de que no existan "undefined" como string en los datos
+    for (const ronda in campeonato) {
+        if (campeonato.hasOwnProperty(ronda)) {
+            campeonato[ronda].forEach(partido => {
+                // Convertir "undefined" (string) a null
+                if (partido.p1 === "undefined") partido.p1 = null;
+                if (partido.p2 === "undefined") partido.p2 = null;
+            });
+        }
+    }
+
     // Ordenar las rondas por número
     const rondas = Object.keys(campeonato).sort((a, b) => parseInt(a) - parseInt(b));
     const totalRondas = rondas.length;
@@ -129,35 +140,59 @@ function generarArbolCampeonato(tipo, data) {
             `;
             
             // Equipo 1
-            if (partido.p1 !== null) {
+            if (partido.p1 !== null && partido.p1 !== undefined && partido.p1 !== "undefined") {
                 const pareja1 = parejas[partido.p1];
-                html += `
-                    <div class="team ${partido.ganador === 'p1' ? 'winner' : ''}">
-                        <span class="team-number">#${partido.p1}</span>
-                        <span class="team-names">${pareja1 ? pareja1.nombre1 + ' / ' + pareja1.nombre2 : 'Por determinar'}</span>
-                    </div>
-                `;
+                if (pareja1) {
+                    // Si existe la pareja, mostrar su número e información
+                    html += `
+                        <div class="team ${partido.ganador === 'p1' ? 'winner' : ''}">
+                            <span class="team-number">#${partido.p1}</span>
+                            <span class="team-names">${pareja1.nombre1 || ''} / ${pareja1.nombre2 || ''}</span>
+                        </div>
+                    `;
+                } else {
+                    // Si tiene ID pero no existe en la lista de parejas
+                    html += `
+                        <div class="team ${partido.ganador === 'p1' ? 'winner' : ''}">
+                            <span class="team-number">#${partido.p1}</span>
+                            <span class="team-names">Por definir</span>
+                        </div>
+                    `;
+                }
             } else {
+                // Si no tiene ID de pareja (null o undefined) o es "undefined"
                 html += `
                     <div class="team">
-                        <span>Por determinar</span>
+                        <span>Por definir</span>
                     </div>
                 `;
             }
             
             // Equipo 2
-            if (partido.p2 !== null) {
+            if (partido.p2 !== null && partido.p2 !== undefined && partido.p2 !== "undefined") {
                 const pareja2 = parejas[partido.p2];
-                html += `
-                    <div class="team ${partido.ganador === 'p2' ? 'winner' : ''}">
-                        <span class="team-number">#${partido.p2}</span>
-                        <span class="team-names">${pareja2 ? pareja2.nombre1 + ' / ' + pareja2.nombre2 : 'Por determinar'}</span>
-                    </div>
-                `;
+                if (pareja2) {
+                    // Si existe la pareja, mostrar su número e información
+                    html += `
+                        <div class="team ${partido.ganador === 'p2' ? 'winner' : ''}">
+                            <span class="team-number">#${partido.p2}</span>
+                            <span class="team-names">${pareja2.nombre1 || ''} / ${pareja2.nombre2 || ''}</span>
+                        </div>
+                    `;
+                } else {
+                    // Si tiene ID pero no existe en la lista de parejas
+                    html += `
+                        <div class="team ${partido.ganador === 'p2' ? 'winner' : ''}">
+                            <span class="team-number">#${partido.p2}</span>
+                            <span class="team-names">Por definir</span>
+                        </div>
+                    `;
+                }
             } else {
+                // Si no tiene ID de pareja (null o undefined) o es "undefined"
                 html += `
                     <div class="team">
-                        <span>Por determinar</span>
+                        <span>Por definir</span>
                     </div>
                 `;
             }
@@ -184,19 +219,8 @@ function generarArbolCampeonato(tipo, data) {
  * @returns {string} Nombre de la ronda
  */
 function getNombreRonda(ronda, totalRondas) {
-    const numRonda = parseInt(ronda);
-    
-    if (numRonda === totalRondas) {
-        return 'Final';
-    } else if (numRonda === totalRondas - 1) {
-        return 'Semifinales';
-    } else if (numRonda === totalRondas - 2) {
-        return 'Cuartos de final';
-    } else if (numRonda === totalRondas - 3) {
-        return 'Octavos de final';
-    } else {
-        return `Ronda ${numRonda}`;
-    }
+    // Simplemente devolver "Ronda X" donde X es el número de ronda
+    return `Ronda ${ronda}`;
 }
 
 /**
@@ -236,6 +260,46 @@ function getEstadoTexto(estado) {
 }
 
 /**
+ * Busca de qué partido anterior sale un rival que aún no está determinado
+ * @param {Object} campeonato - Datos del campeonato
+ * @param {string} rondaActual - Ronda actual
+ * @param {number} partidoActual - Índice del partido actual
+ * @param {string} posicionRival - Posición del rival (p1 o p2)
+ * @returns {Object|null} Información del origen del rival o null
+ */
+function buscarOrigenRival(campeonato, rondaActual, partidoActual, posicionRival) {
+    // Si estamos en la ronda 1, no hay partido anterior
+    if (rondaActual === "1" || rondaActual === 1) return null;
+    
+    const rondaAnterior = (parseInt(rondaActual) - 1).toString();
+    
+    // No hay ronda anterior
+    if (!campeonato[rondaAnterior]) return null;
+    
+    // Calcular el índice del partido en la ronda anterior
+    // Si estamos buscando p1, el partido anterior es partidoActual*2
+    // Si estamos buscando p2, el partido anterior es partidoActual*2+1
+    const partidoAnteriorIndice = posicionRival === 'p1' ? partidoActual * 2 : partidoActual * 2 + 1;
+    
+    // Verificar si existe ese partido en la ronda anterior
+    if (!campeonato[rondaAnterior][partidoAnteriorIndice]) return null;
+    
+    const partidoAnterior = campeonato[rondaAnterior][partidoAnteriorIndice];
+    
+    // Asegurarnos de que el partido anterior existe y tiene la estructura correcta
+    if (!partidoAnterior) return null;
+    
+    return {
+        ronda: rondaAnterior,
+        indice: partidoAnteriorIndice,
+        partido: partidoAnterior,
+        equipo1: partidoAnterior.p1 !== undefined ? partidoAnterior.p1 : null,
+        equipo2: partidoAnterior.p2 !== undefined ? partidoAnterior.p2 : null,
+        posicion: 'p1' // El ganador del partido anterior siempre va a la posición p1 o p2 del siguiente
+    };
+}
+
+/**
  * Busca la pareja por su número y muestra su próximo partido
  */
 function buscarPareja() {
@@ -268,42 +332,169 @@ function buscarPareja() {
                 return;
             }
             
-            // Buscar el partido de la pareja
+            // Buscar el próximo partido pendiente o en juego de la pareja
             let partidoEncontrado = false;
             let html = '';
             
+            // Ordenar las rondas para procesarlas en orden
+            const rondas = Object.keys(campeonato).sort((a, b) => parseInt(a) - parseInt(b));
+            
             // Recorremos todas las rondas
-            for (const ronda in campeonato) {
+            for (const ronda of rondas) {
                 const partidasRonda = campeonato[ronda];
                 
                 // Recorremos todos los partidos de la ronda
-                partidasRonda.forEach((partido, index) => {
-                    // Si la pareja está en este partido
-                    if (partido.p1 == numeroPareja || partido.p2 == numeroPareja) {
-                        const rival = partido.p1 == numeroPareja ? partido.p2 : partido.p1;
-                        const nombreRival = rival !== null ? 
-                            (parejas[rival] ? `${parejas[rival].nombre1} / ${parejas[rival].nombre2}` : 'Por determinar') : 
-                            'Por determinar';
+                for (let index = 0; index < partidasRonda.length; index++) {
+                    const partido = partidasRonda[index];
+                    
+                    // Si la pareja está en este partido y el partido no está completado
+                    if ((partido.p1 == numeroPareja || partido.p2 == numeroPareja) && partido.estado !== 'completado') {
+                        const posicionPareja = partido.p1 == numeroPareja ? 'p1' : 'p2';
+                        const posicionRival = posicionPareja === 'p1' ? 'p2' : 'p1';
+                        const rival = partido[posicionRival];
                         
                         html += `
                             <h4><i class="fas fa-trophy"></i> Tu próximo partido</h4>
                             <p><strong>Campeonato:</strong> ${tipoCampeonato.charAt(0).toUpperCase() + tipoCampeonato.slice(1)}</p>
-                            <p><strong>Ronda:</strong> ${getNombreRonda(ronda, Object.keys(campeonato).length)}</p>
+                            <p><strong>Ronda:</strong> ${getNombreRonda(ronda, rondas.length)}</p>
                             <p><strong>Estado:</strong> <span class="estado-badge estado-${partido.estado}">${getEstadoTexto(partido.estado)}</span></p>
-                            <p><strong>Tu pareja:</strong> #${numeroPareja} - ${parejas[numeroPareja].nombre1} / ${parejas[numeroPareja].nombre2}</p>
-                            <p><strong>Rival:</strong> ${rival !== null ? `#${rival} - ` : ''}${nombreRival}</p>
+                            <p><strong>Tu pareja:</strong> #${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
                         `;
                         
+                        // Si el rival está determinado
+                        if (rival !== null && rival !== undefined) {
+                            const parejaRival = parejas[rival];
+                            if (parejaRival) {
+                                html += `<p><strong>Rival:</strong> #${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
+                            } else {
+                                html += `<p><strong>Rival:</strong> #${rival} - Por definir</p>`;
+                            }
+                        } else {
+                            // Intentar buscar de qué partido anterior saldrá el rival
+                            const rivalInfo = buscarOrigenRival(campeonato, ronda, index, posicionRival);
+                            
+                            if (rivalInfo && rivalInfo.partido) {
+                                const partidoAnterior = rivalInfo.partido;
+                                
+                                // Determinar el estado del partido anterior
+                                let estadoPartidoAnterior = 'estado desconocido';
+                                if (partidoAnterior.estado === 'pendiente') {
+                                    estadoPartidoAnterior = 'todavía no se está jugando';
+                                } else if (partidoAnterior.estado === 'jugando') {
+                                    estadoPartidoAnterior = 'se está jugando ahora mismo';
+                                } else if (partidoAnterior.estado === 'completado') {
+                                    estadoPartidoAnterior = 'ya ha finalizado';
+                                }
+                                
+                                // Información de las parejas del partido anterior
+                                let pareja1Info = 'Por definir';
+                                if (partidoAnterior.p1 !== null && partidoAnterior.p1 !== undefined) {
+                                    const p1 = parejas[partidoAnterior.p1];
+                                    if (p1) {
+                                        pareja1Info = `#${partidoAnterior.p1} - ${p1.nombre1 || ''} / ${p1.nombre2 || ''}`;
+                                    } else {
+                                        pareja1Info = `#${partidoAnterior.p1} - Por definir`;
+                                    }
+                                }
+                                
+                                let pareja2Info = 'Por definir';
+                                if (partidoAnterior.p2 !== null && partidoAnterior.p2 !== undefined) {
+                                    const p2 = parejas[partidoAnterior.p2];
+                                    if (p2) {
+                                        pareja2Info = `#${partidoAnterior.p2} - ${p2.nombre1 || ''} / ${p2.nombre2 || ''}`;
+                                    } else {
+                                        pareja2Info = `#${partidoAnterior.p2} - Por definir`;
+                                    }
+                                }
+                                
+                                // Mostrar información de dónde saldrá el rival
+                                html += `
+                                    <p><strong>Rival:</strong> Por definir</p>
+                                    <div class="rival-info" style="background:#f5f5f5; padding:10px; border-radius:5px; margin-top:10px;">
+                                        <p><i class="fas fa-info-circle"></i> <strong>Tu rival saldrá de la partida entre:</strong></p>
+                                        <ul style="margin-top: 5px; padding-left: 20px;">
+                                            <li>Pareja ${partidoAnterior.p1 !== null && partidoAnterior.p1 !== undefined ? pareja1Info : 'Por definir'}</li>
+                                            <li>Pareja ${partidoAnterior.p2 !== null && partidoAnterior.p2 !== undefined ? pareja2Info : 'Por definir'}</li>
+                                        </ul>
+                                        <p style="margin-top: 5px;">El partido entre estas parejas ${estadoPartidoAnterior}.</p>
+                                    </div>
+                                `;
+                            } else {
+                                html += `<p><strong>Rival:</strong> Por definir</p>`;
+                                
+                                // Mostrar información de que no se puede determinar el origen del rival
+                                html += `
+                                    <div class="rival-info" style="background:#f5f5f5; padding:10px; border-radius:5px; margin-top:10px;">
+                                        <p><i class="fas fa-info-circle"></i> <strong>Información del rival:</strong></p>
+                                        <p>Tu rival aún no está definido. Espera a que se complete la ronda anterior.</p>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        // Información adicional sobre el estado del partido
+                        
+                        
                         partidoEncontrado = true;
-                        return;
+                        break;
                     }
-                });
+                }
                 
                 if (partidoEncontrado) break;
             }
             
+            // Si no se encontró un partido pendiente o en juego, buscar el último partido completado
             if (!partidoEncontrado) {
-                html = `<p><i class="fas fa-info-circle"></i> No se encontró ningún partido pendiente para la pareja #${numeroPareja}</p>`;
+                for (const ronda of [...rondas].reverse()) { // Recorrer las rondas en orden inverso
+                    const partidasRonda = campeonato[ronda];
+                    
+                    for (let index = 0; index < partidasRonda.length; index++) {
+                        const partido = partidasRonda[index];
+                        
+                        // Si la pareja está en este partido y está completado
+                        if ((partido.p1 == numeroPareja || partido.p2 == numeroPareja) && partido.estado === 'completado') {
+                            const posicionPareja = partido.p1 == numeroPareja ? 'p1' : 'p2';
+                            const posicionRival = posicionPareja === 'p1' ? 'p2' : 'p1';
+                            const rival = partido[posicionRival];
+                            const ganador = partido.ganador === posicionPareja;
+                            
+                            html += `
+                                <h4><i class="fas fa-trophy"></i> Tu último partido</h4>
+                                <p><strong>Campeonato:</strong> ${tipoCampeonato.charAt(0).toUpperCase() + tipoCampeonato.slice(1)}</p>
+                                <p><strong>Ronda:</strong> ${getNombreRonda(ronda, rondas.length)}</p>
+                                <p><strong>Estado:</strong> <span class="estado-badge estado-completado">Completado</span></p>
+                                <p><strong>Tu pareja:</strong> #${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
+                            `;
+                            
+                            if (rival !== null && rival !== undefined) {
+                                const parejaRival = parejas[rival];
+                                if (parejaRival) {
+                                    html += `<p><strong>Rival:</strong> #${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
+                                } else {
+                                    html += `<p><strong>Rival:</strong> #${rival} - Por definir</p>`;
+                                }
+                            } else {
+                                html += `<p><strong>Rival:</strong> Por definir</p>`;
+                            }
+                            
+                            html += `
+                                <p><i class="fas fa-check-circle"></i> Este partido ha finalizado. Resultado: <strong>${ganador ? '¡Has ganado!' : 'Has perdido'}</strong></p>
+                                ${ganador && ronda !== rondas[rondas.length - 1] ? '<p><i class="fas fa-arrow-right"></i> Avanzaste a la siguiente ronda.</p>' : ''}
+                                ${ganador && ronda === rondas[rondas.length - 1] ? '<p><i class="fas fa-crown" style="color: gold;"></i> <strong>¡Felicidades! Eres el campeón del torneo.</strong></p>' : ''}
+                                <p><i class="fas fa-info-circle"></i> No tienes partidos pendientes en este momento.</p>
+                            `;
+                            
+                            partidoEncontrado = true;
+                            break;
+                        }
+                    }
+                    
+                    if (partidoEncontrado) break;
+                }
+            }
+            
+            if (!partidoEncontrado) {
+                html = `<p><i class="fas fa-info-circle"></i> No se encontró ningún partido para la pareja #${numeroPareja}</p>`;
             }
             
             resultadoDiv.innerHTML = html;

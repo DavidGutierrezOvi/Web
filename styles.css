@@ -984,6 +984,7 @@ footer .footer-section:first-child h3 {
 .historia-texto p {
     margin-bottom: 15px;
     line-height: 1.6;
+    text-align: justify;
 }
 
 /* Ajustes para dispositivos móviles */
@@ -1145,9 +1146,55 @@ footer .footer-section:first-child h3 {
     .btn-mes-siguiente:hover {
     transform: translateY(-2px);
     }
+
+    /* Estilos específicos para campeonatos en móvil */
+    .tournament-bracket {
+        overflow-x: auto;
+        padding-bottom: 15px;
+    }
+    
+    .round {
+        min-width: 280px;
+    }
+    
+    .match {
+        padding: 8px;
+        margin: 4px;
+    }
+    
+    .match-status {
+        font-size: 0.7rem;
+        padding: 1px 3px;
+    }
+    
+    .team-number, .team-names {
+        font-size: 0.85rem;
+    }
+    
+    .search-result {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    
+    .rival-info {
+        padding: 8px !important;
+        margin-top: 8px !important;
+    }
 }
 
 /* Asegurar que todos los elementos se ajusten al ancho de la pantalla */
 img, video, iframe, table, div {
     max-width: 100%;
+}
+
+/* Reglas específicas para los campeonatos */
+.match .team-number:empty,
+.match .team-number:contains("undefined") {
+    display: none;
+}
+
+/* Ocultar el texto "#undefined" en los equipos */
+.match .team-number:empty + .team-names,
+.match .team:has(> .team-number:contains("undefined")) .team-names {
+    margin-left: 0;
 }
