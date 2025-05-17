@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Campeonatos - Peña El Cuervo</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, rgba(154, 50, 181, 0.87) 0%, #6a1b9a 100%);
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .admin-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .admin-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 10px 0 0;
+            font-size: 1.2rem;
+        }
+
+        .admin-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .admin-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 3px solid transparent;
+        }
+
+        .admin-tab.active {
+            border-bottom: 3px solid #6a1b9a;
+            color: #6a1b9a;
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #6a1b9a;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #c62828;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        .match-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .match-info {
+            flex: 1;
+        }
+
+        .match-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .match-actions button {
+            margin-left: 5px;
+        }
+
+        .estado-badge {
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .estado-pendiente {
+            background-color: #f5f5f5;
+            color: #757575;
+        }
+
+        .estado-jugando {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+
+        .estado-completado {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        @media (max-width: 768px) {
+            .match-row {
+                flex-direction: column;
+            }
+
+            .match-actions {
+                margin-top: 10px;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header y navegación -->
+    <header>
+        <div class="logo-container">
+            <h1><span class="nombre-pena"> Peña El Cuervo</span></h1>
+            <div class="logo-icon"><i class="fas fa-crow"></i></div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="../campeonatos.html">Campeonatos</a></li>
+                <li><a href="campeonatos.html" class="active">Admin</a></li>
+            </ul>
+        </nav>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- Encabezado de página -->
+    <div class="admin-header">
+        <div class="container">
+            <h1>Administración de Campeonatos</h1>
+            <p>Gestión de parejas y partidas</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Pestañas de administración -->
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="mus">Mus</div>
+            <div class="admin-tab" data-tab="tute">Tute</div>
+            <div class="admin-tab" data-tab="parchis">Parchís</div>
+        </div>
+
+        <!-- Contenido de pestañas -->
+        <div id="admin-mus" class="admin-content active">
+            <div class="admin-container">
+                <h2>Gestionar Parejas - Mus</h2>
+                <form id="form-parejas-mus">
+                    <div class="form-group">
+                        <label for="numero-pareja-mus">Número de Pareja</label>
+                        <input type="number" id="numero-pareja-mus" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre1-mus">Nombre Jugador 1</label>
+                        <input type="text" id="nombre1-mus" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre2-mus">Nombre Jugador 2</label>
+                        <input type="text" id="nombre2-mus" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Añadir Pareja</button>
+                    </div>
+                </form>
+                <table id="tabla-parejas-mus">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Jugador 1</th>
+                            <th>Jugador 2</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las parejas se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-container">
+                <h2>Gestionar Partidas - Mus</h2>
+                <div id="partidas-mus">
+                    <!-- Las partidas se cargarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-tute" class="admin-content">
+            <div class="admin-container">
+                <h2>Gestionar Parejas - Tute</h2>
+                <form id="form-parejas-tute">
+                    <div class="form-group">
+                        <label for="numero-pareja-tute">Número de Pareja</label>
+                        <input type="number" id="numero-pareja-tute" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre1-tute">Nombre Jugador 1</label>
+                        <input type="text" id="nombre1-tute" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre2-tute">Nombre Jugador 2</label>
+                        <input type="text" id="nombre2-tute" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Añadir Pareja</button>
+                    </div>
+                </form>
+                <table id="tabla-parejas-tute">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Jugador 1</th>
+                            <th>Jugador 2</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las parejas se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-container">
+                <h2>Gestionar Partidas - Tute</h2>
+                <div id="partidas-tute">
+                    <!-- Las partidas se cargarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-parchis" class="admin-content">
+            <div class="admin-container">
+                <h2>Gestionar Parejas - Parchís</h2>
+                <form id="form-parejas-parchis">
+                    <div class="form-group">
+                        <label for="numero-pareja-parchis">Número de Pareja</label>
+                        <input type="number" id="numero-pareja-parchis" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre1-parchis">Nombre Jugador 1</label>
+                        <input type="text" id="nombre1-parchis" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre2-parchis">Nombre Jugador 2</label>
+                        <input type="text" id="nombre2-parchis" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Añadir Pareja</button>
+                    </div>
+                </form>
+                <table id="tabla-parejas-parchis">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Jugador 1</th>
+                            <th>Jugador 2</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las parejas se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-container">
+                <h2>Gestionar Partidas - Parchís</h2>
+                <div id="partidas-parchis">
+                    <!-- Las partidas se cargarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Peña El Cuervo</h3>
+                    <p>Área de administración</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Peña El Cuervo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/admin-campeonatos.js"></script>
+</body>
+</html> 
