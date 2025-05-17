@@ -132,8 +132,7 @@ function cargarPartidas(tipo, data) {
             <button id="reset-campeonato-${tipo}" class="btn btn-danger">
                 <i class="fas fa-trash"></i> Reiniciar Campeonato
             </button>
-                    <button id="generar-pdf-${tipo}" class="btn btn-success">                    <i class="fas fa-file-pdf"></i> Generar PDF                </button>
-                    <button id="generar-excel-arbol-${tipo}" class="btn btn-success" style="display: none;">                    <i class="fas fa-file-excel"></i> Excel Árbol                </button>
+                    <button id="generar-pdf-${tipo}" class="btn btn-success">                    <i class="fas fa-file-pdf"></i> Generar PDF                </button>                <button id="generar-excel-arbol-${tipo}" class="btn btn-success">                    <i class="fas fa-file-excel"></i> Excel Árbol                </button>
         </div>
     `;
     
@@ -974,174 +973,101 @@ function mostrarExito(mensaje) {
  * @param {Object} rondas - Datos de las rondas y partidos
  */
 function generarExcelArbol(tipo, rondas) {
-    try {
-        console.log("Iniciando generación de Excel para árbol de " + tipo);
-        
-        // Verificar que XLSX esté disponible
-        if (typeof XLSX === 'undefined') {
-            console.error('La biblioteca SheetJS (XLSX) no está disponible');
-            mostrarError('No se encuentra la biblioteca Excel. Recarga la página.');
-            return;
-        }
-        
-        // Obtener las parejas del campeonato
-        database.ref(`campeonatos/parejas/${tipo}`).once('value')
-            .then(snapshot => {
-                const parejas = snapshot.val() || {};
-                
-                if (!rondas || Object.keys(rondas).length === 0) {
-                    mostrarError('No hay datos de campeonato para generar el árbol');
-                    return;
-                }
-                
-                // Ordenar las rondas por número
-                const rondasKeys = Object.keys(rondas).sort((a, b) => parseInt(a) - parseInt(b));
-                console.log("Rondas disponibles:", rondasKeys);
-                
-                // Crear una matriz para la hoja (400 filas para soportar torneos grandes con separación adecuada)
-                const data = [];
-                for (let i = 0; i < 400; i++) {
-                    data.push(Array(30).fill(""));
-                }
-                
-                // Series para posiciones y separaciones
-                // Serie de posiciones iniciales para cada ronda: 0,1,2,3,5,9,17...
-                const posicionesIniciales = [0, 1, 2, 3, 5, 9, 17, 33, 65];
-                
-                // Generamos más valores si no tenemos suficientes
-                while (posicionesIniciales.length <= rondasKeys.length) {
-                    const ultimo = posicionesIniciales[posicionesIniciales.length - 1];
-                    const penultimo = posicionesIniciales[posicionesIniciales.length - 2];
-                    const siguiente = ultimo + 2 * (ultimo - penultimo);
-                    posicionesIniciales.push(siguiente);
-                }
-                
-                console.log("Posiciones iniciales:", posicionesIniciales);
-                
-                // Separaciones entre parejas para cada ronda: 1,3,7,15,31...
-                const separaciones = [1];
-                for (let i = 1; i < rondasKeys.length; i++) {
-                    separaciones.push(separaciones[i-1] * 2 + 1);
-                }
-                
-                console.log("Separaciones entre parejas:", separaciones);
-                
-                // Para registrar todas las celdas con bordes
-                const bordes = {};
-                
-                // Para cada ronda, colocar los datos de parejas
-                for (let rIndex = 0; rIndex < rondasKeys.length; rIndex++) {
-                    const ronda = rondasKeys[rIndex];
-                    const partidosRonda = rondas[ronda];
-                    const numPartidos = partidosRonda.length;
-                    
-                    console.log(`Ronda ${ronda}: ${numPartidos} partidos`);
-                    
-                    // Columna donde se colocarán los datos para esta ronda
-                    const columna = rIndex * 3; // Multiplicamos por 3 para dar más espacio entre columnas
-                    
-                    // Factor de expansión para la separación
-                    const factorExp = Math.pow(2, rIndex);
-                    
-                    // Colocar los datos para cada partido
-                    for (let p = 0; p < numPartidos; p++) {
-                        const partido = partidosRonda[p];
-                        
-                        // Calcular la posición de cada pareja aplicando la separación adecuada
-                        // La separación es exponencial según la ronda
-                        const fila = p * (separaciones[rIndex] + 1) * factorExp;
-                        
-                        // Obtener datos de las parejas
-                        const pareja1 = partido.p1 !== null ? parejas[partido.p1] : null;
-                        const pareja2 = partido.p2 !== null ? parejas[partido.p2] : null;
-                        
-                        // Para cada partido, colocamos información de las dos parejas
-                        // Información de la primera pareja
-                        if (pareja1) {
-                            data[fila][columna] = `#${partido.p1}`;
-                            data[fila][columna + 1] = `${pareja1.nombre1}/${pareja1.nombre2}`;
-                        } else if (partido.p1 !== null) {
-                            data[fila][columna] = `#${partido.p1}`;
-                            data[fila][columna + 1] = "Por definir";
-                        } else {
-                            data[fila][columna] = "?";
-                            data[fila][columna + 1] = "Por definir";
-                        }
-                        
-                        // Información de la segunda pareja (con la separación adecuada)
-                        if (pareja2) {
-                            data[fila + 1][columna] = `#${partido.p2}`;
-                            data[fila + 1][columna + 1] = `${pareja2.nombre1}/${pareja2.nombre2}`;
-                        } else if (partido.p2 !== null) {
-                            data[fila + 1][columna] = `#${partido.p2}`;
-                            data[fila + 1][columna + 1] = "Por definir";
-                        } else {
-                            data[fila + 1][columna] = "?";
-                            data[fila + 1][columna + 1] = "Por definir";
-                        }
-                        
-                        // Registrar bordes para estas celdas
-                        const cellRef1 = XLSX.utils.encode_cell({r: fila, c: columna});
-                        const cellRef2 = XLSX.utils.encode_cell({r: fila, c: columna + 1});
-                        const cellRef3 = XLSX.utils.encode_cell({r: fila + 1, c: columna});
-                        const cellRef4 = XLSX.utils.encode_cell({r: fila + 1, c: columna + 1});
-                        
-                        // Añadir bordes a las celdas
-                        bordes[cellRef1] = { border: { top: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} }};
-                        bordes[cellRef2] = { border: { top: {style:'thin'}, right: {style:'thin'} }};
-                        bordes[cellRef3] = { border: { left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} }};
-                        bordes[cellRef4] = { border: { bottom: {style:'thin'}, right: {style:'thin'} }};
-                        
-                        // Marcar al ganador si existe
-                        if (partido.ganador) {
-                            const ganadorfila = partido.ganador === 'p1' ? fila : fila + 1;
-                            data[ganadorfila][columna + 2] = "→";
-                        }
-                        
-                        console.log(`Partido ${p+1} en ronda ${ronda}: parejas ${partido.p1} vs ${partido.p2} en filas ${fila} y ${fila+1}`);
-                    }
-                }
-                
-                // Añadir un título al Excel
-                data[0][0] = `ÁRBOL DEL CAMPEONATO DE ${tipo.toUpperCase()}`;
-                
-                // Convertir la matriz a una hoja de Excel
-                const ws = XLSX.utils.aoa_to_sheet(data);
-                
-                // Aplicar estilos de bordes y anchos de columna
-                ws['!cols'] = [
-                    { width: 10 }, // Columna A: números de pareja
-                    { width: 25 }, // Columna B: nombres
-                    { width: 5 },  // Columna C: flechas
-                ];
-                
-                // Aplicar los bordes a las celdas
-                for (const cellRef in bordes) {
-                    if (!ws[cellRef]) ws[cellRef] = {};
-                    ws[cellRef].s = bordes[cellRef];
-                }
-                
-                // Crear libro y añadir hoja
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, `Árbol ${tipo}`);
-                
-                // Generar archivo
-                const fecha = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
-                const nombreArchivo = `Arbol_${tipo}_${fecha}.xlsx`;
-                
-                console.log("Generando archivo Excel:", nombreArchivo);
-                XLSX.writeFile(wb, nombreArchivo);
-                
-                console.log("Excel generado correctamente");
-                mostrarExito('Excel del árbol generado correctamente');
-            })
-            .catch(error => {
-                console.error("Error al obtener parejas:", error);
-                mostrarError("Error al obtener datos de parejas: " + error.message);
-            });
-        
-    } catch (error) {
-        console.error("Error al generar Excel:", error);
-        mostrarError("Error al generar el Excel: " + error.message);
+    console.log(`Generando Excel del árbol del campeonato de ${tipo}`);
+    
+    // Verificar que XLSX esté disponible
+    if (typeof XLSX === 'undefined') {
+        console.error('La biblioteca SheetJS (XLSX) no está disponible');
+        mostrarError('Error: Biblioteca Excel no disponible. Recarga la página e intenta de nuevo.');
+        return;
     }
+    
+    if (!rondas || Object.keys(rondas).length === 0) {
+        mostrarError('No hay datos de rondas disponibles para generar el Excel');
+        return;
+    }
+    
+    // Ordenar las rondas por número
+    const rondasKeys = Object.keys(rondas).sort((a, b) => parseInt(a) - parseInt(b));
+    const totalRondas = rondasKeys.length;
+    const partidosPrimeraRonda = rondas[rondasKeys[0]].length;
+    
+    // Calcular el número total de filas necesario basándonos en la primera ronda
+    // Para cada partido en la primera ronda, necesitamos 2 casillas (una para cada pareja)
+    // y un espacio entre partidos (excepto después del último)
+    const totalFilas = partidosPrimeraRonda * 3 - 1;
+    
+    // Crear una matriz vacía para nuestro worksheet
+    const worksheet = [];
+    for (let i = 0; i < totalFilas; i++) {
+        worksheet[i] = new Array(totalRondas * 2).fill("");
+    }
+    
+    // Para cada ronda
+    for (let rondaIndex = 0; rondaIndex < totalRondas; rondaIndex++) {
+        const ronda = rondasKeys[rondaIndex];
+        const partidosRonda = rondas[ronda];
+        const columna = rondaIndex * 2; // Usamos columnas pares para los datos
+        
+        // El espaciado entre grupos de parejas aumenta con cada ronda
+        const espaciadoGrupos = Math.pow(2, rondaIndex) * 3;
+        
+        // Para cada partido en esta ronda
+        for (let partidoIndex = 0; partidoIndex < partidosRonda.length; partidoIndex++) {
+            const partido = partidosRonda[partidoIndex];
+            
+            // Calcular la fila base para este partido
+            const filaBase = partidoIndex * espaciadoGrupos;
+            
+            // Añadir pareja 1
+            if (partido.p1 !== null && partido.p1 !== undefined && partido.p1 !== "undefined") {
+                worksheet[filaBase][columna] = partido.p1.toString();
+            }
+            
+            // Añadir pareja 2 (una fila debajo)
+            if (partido.p2 !== null && partido.p2 !== undefined && partido.p2 !== "undefined") {
+                worksheet[filaBase + 1][columna] = partido.p2.toString();
+            }
+        }
+    }
+    
+    // Convertir nuestra matriz a una hoja de Excel
+    const ws = XLSX.utils.aoa_to_sheet(worksheet);
+    
+    // Configurar ancho de columnas uniforme (aproximadamente 6.5 píxeles)
+    ws['!cols'] = Array(totalRondas * 2).fill({ width: 6.5 });
+    
+    // Añadir bordes a todas las celdas que contienen datos
+    for (let i = 0; i < totalFilas; i++) {
+        for (let j = 0; j < totalRondas * 2; j++) {
+            // Solo añadir bordes a celdas con contenido
+            if (worksheet[i][j]) {
+                const cellRef = XLSX.utils.encode_cell({ r: i, c: j });
+                if (!ws[cellRef]) ws[cellRef] = {};
+                if (!ws[cellRef].s) ws[cellRef].s = {};
+                
+                // Añadir estilos de borde y alineación
+                ws[cellRef].s = {
+                    border: {
+                        top: { style: "thin" },
+                        left: { style: "thin" },
+                        bottom: { style: "thin" },
+                        right: { style: "thin" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center" }
+                };
+            }
+        }
+    }
+    
+    // Crear un libro Excel nuevo
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `Árbol ${tipo}`);
+    
+    // Generar archivo y descargarlo
+    const fecha = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+    XLSX.writeFile(wb, `Arbol_${tipo}_${fecha}.xlsx`);
+    
+    console.log('Excel generado exitosamente');
+    mostrarExito('Excel del árbol visual generado correctamente. Descarga iniciada.');
 } 

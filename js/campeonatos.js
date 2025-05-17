@@ -24,6 +24,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Configurar el buscador de parejas
     document.getElementById('buscar-pareja').addEventListener('click', buscarPareja);
+    
+    // Configurar botones para generar Excel
+    ['mus', 'tute', 'parchis'].forEach(tipo => {
+        const botonExcel = document.getElementById(`generar-excel-arbol-${tipo}`);
+        if (botonExcel) {
+            botonExcel.addEventListener('click', function() {
+                generarExcelArbol(tipo);
+            });
+        }
+    });
 });
 
 /**
@@ -155,7 +165,7 @@ function generarArbolCampeonato(tipo, data) {
                     // Si existe la pareja, mostrar su número e información
                     html += `
                         <div class="team ${partido.ganador === 'p1' ? 'winner' : ''}">
-                            <span class="team-number">#${partido.p1}</span>
+                            <span class="team-number">${partido.p1}</span>
                             <span class="team-names">${pareja1.nombre1 || ''} / ${pareja1.nombre2 || ''}</span>
                         </div>
                     `;
@@ -163,7 +173,7 @@ function generarArbolCampeonato(tipo, data) {
                     // Si tiene ID pero no existe en la lista de parejas
                     html += `
                         <div class="team ${partido.ganador === 'p1' ? 'winner' : ''}">
-                            <span class="team-number">#${partido.p1}</span>
+                            <span class="team-number">${partido.p1}</span>
                             <span class="team-names">Por definir</span>
                         </div>
                     `;
@@ -184,7 +194,7 @@ function generarArbolCampeonato(tipo, data) {
                     // Si existe la pareja, mostrar su número e información
                     html += `
                         <div class="team ${partido.ganador === 'p2' ? 'winner' : ''}">
-                            <span class="team-number">#${partido.p2}</span>
+                            <span class="team-number">${partido.p2}</span>
                             <span class="team-names">${pareja2.nombre1 || ''} / ${pareja2.nombre2 || ''}</span>
                         </div>
                     `;
@@ -192,7 +202,7 @@ function generarArbolCampeonato(tipo, data) {
                     // Si tiene ID pero no existe en la lista de parejas
                     html += `
                         <div class="team ${partido.ganador === 'p2' ? 'winner' : ''}">
-                            <span class="team-number">#${partido.p2}</span>
+                            <span class="team-number">${partido.p2}</span>
                             <span class="team-names">Por definir</span>
                         </div>
                     `;
@@ -361,7 +371,7 @@ function buscarPareja() {
             
             // Comprobar si existe la pareja
             if (!parejas[numeroPareja]) {
-                resultadoDiv.innerHTML = `<p style="color: #d32f2f;"><i class="fas fa-exclamation-circle"></i> La pareja #${numeroPareja} no existe en este campeonato</p>`;
+                resultadoDiv.innerHTML = `<p style="color: #d32f2f;"><i class="fas fa-exclamation-circle"></i> La pareja ${numeroPareja} no existe en este campeonato</p>`;
                 resultadoDiv.style.display = 'block';
                 return;
             }
@@ -392,16 +402,16 @@ function buscarPareja() {
                             <p><strong>Campeonato:</strong> ${tipoCampeonato.charAt(0).toUpperCase() + tipoCampeonato.slice(1)}</p>
                             <p><strong>Ronda:</strong> ${getNombreRonda(ronda, rondas.length)}</p>
                             <p><strong>Estado:</strong> <span class="estado-badge estado-${partido.estado}">${getEstadoTexto(partido.estado)}</span></p>
-                            <p><strong>Tu pareja:</strong> #${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
+                            <p><strong>Tu pareja:</strong> ${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
                         `;
                         
                         // Si el rival está determinado
                         if (isValidValue(rival)) {
                             const parejaRival = parejas[rival];
                             if (parejaRival) {
-                                html += `<p><strong>Rival:</strong> #${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
+                                html += `<p><strong>Rival:</strong> ${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
                             } else {
-                                html += `<p><strong>Rival:</strong> #${rival} - Por definir</p>`;
+                                html += `<p><strong>Rival:</strong> ${rival} - Por definir</p>`;
                             }
                         } else {
                             // Intentar buscar de qué partido anterior saldrá el rival
@@ -409,6 +419,7 @@ function buscarPareja() {
                             
                             if (rivalInfo && rivalInfo.partido) {
                                 const partidoAnterior = rivalInfo.partido;
+                                console.log("Se encontró información del partido anterior:", partidoAnterior);
                                 
                                 // Determinar el estado del partido anterior
                                 let estadoPartidoAnterior = 'estado desconocido';
@@ -422,24 +433,32 @@ function buscarPareja() {
                                 
                                 // Información de las parejas del partido anterior
                                 let pareja1Info = 'Por definir';
-                                if (isValidValue(partidoAnterior.p1)) {
-                                    const p1 = parejas[partidoAnterior.p1];
+                                let pareja2Info = 'Por definir';
+                                
+                                // Procesar información de la pareja 1
+                                const p1Id = partidoAnterior.p1;
+                                if (p1Id !== null && p1Id !== undefined && p1Id !== "undefined") {
+                                    const p1 = parejas[p1Id];
                                     if (p1) {
-                                        pareja1Info = `#${partidoAnterior.p1} - ${p1.nombre1 || ''} / ${p1.nombre2 || ''}`;
+                                        pareja1Info = `${p1Id} - ${p1.nombre1 || ''} / ${p1.nombre2 || ''}`;
                                     } else {
-                                        pareja1Info = `#${partidoAnterior.p1} - Por definir`;
+                                        pareja1Info = `${p1Id} - Por definir`;
                                     }
                                 }
                                 
-                                let pareja2Info = 'Por definir';
-                                if (isValidValue(partidoAnterior.p2)) {
-                                    const p2 = parejas[partidoAnterior.p2];
+                                // Procesar información de la pareja 2
+                                const p2Id = partidoAnterior.p2;
+                                if (p2Id !== null && p2Id !== undefined && p2Id !== "undefined") {
+                                    const p2 = parejas[p2Id];
                                     if (p2) {
-                                        pareja2Info = `#${partidoAnterior.p2} - ${p2.nombre1 || ''} / ${p2.nombre2 || ''}`;
+                                        pareja2Info = `${p2Id} - ${p2.nombre1 || ''} / ${p2.nombre2 || ''}`;
                                     } else {
-                                        pareja2Info = `#${partidoAnterior.p2} - Por definir`;
+                                        pareja2Info = `${p2Id} - Por definir`;
                                     }
                                 }
+                                
+                                console.log("Información procesada de parejas anteriores:", 
+                                    { p1Id, pareja1Info, p2Id, pareja2Info });
                                 
                                 // Mostrar información de dónde saldrá el rival
                                 html += `
@@ -447,8 +466,8 @@ function buscarPareja() {
                                     <div class="rival-info" style="background:#f5f5f5; padding:10px; border-radius:5px; margin-top:10px;">
                                         <p><i class="fas fa-info-circle"></i> <strong>Tu rival saldrá de la partida entre:</strong></p>
                                         <ul style="margin-top: 5px; padding-left: 20px;">
-                                            <li>Pareja ${isValidValue(partidoAnterior.p1) ? pareja1Info : 'Por definir'}</li>
-                                            <li>Pareja ${isValidValue(partidoAnterior.p2) ? pareja2Info : 'Por definir'}</li>
+                                            <li>Pareja ${pareja1Info}</li>
+                                            <li>Pareja ${pareja2Info}</li>
                                         </ul>
                                         <p style="margin-top: 5px;">El partido entre estas parejas ${estadoPartidoAnterior}.</p>
                                     </div>
@@ -497,15 +516,15 @@ function buscarPareja() {
                                 <p><strong>Campeonato:</strong> ${tipoCampeonato.charAt(0).toUpperCase() + tipoCampeonato.slice(1)}</p>
                                 <p><strong>Ronda:</strong> ${getNombreRonda(ronda, rondas.length)}</p>
                                 <p><strong>Estado:</strong> <span class="estado-badge estado-completado">Completado</span></p>
-                                <p><strong>Tu pareja:</strong> #${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
+                                <p><strong>Tu pareja:</strong> ${numeroPareja} - ${parejas[numeroPareja].nombre1 || ''} / ${parejas[numeroPareja].nombre2 || ''}</p>
                             `;
                             
                             if (isValidValue(rival)) {
                                 const parejaRival = parejas[rival];
                                 if (parejaRival) {
-                                    html += `<p><strong>Rival:</strong> #${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
+                                    html += `<p><strong>Rival:</strong> ${rival} - ${parejaRival.nombre1 || ''} / ${parejaRival.nombre2 || ''}</p>`;
                                 } else {
-                                    html += `<p><strong>Rival:</strong> #${rival} - Por definir</p>`;
+                                    html += `<p><strong>Rival:</strong> ${rival} - Por definir</p>`;
                                 }
                             } else {
                                 html += `<p><strong>Rival:</strong> Por definir</p>`;
@@ -528,7 +547,7 @@ function buscarPareja() {
             }
             
             if (!partidoEncontrado) {
-                html = `<p><i class="fas fa-info-circle"></i> No se encontró ningún partido para la pareja #${numeroPareja}</p>`;
+                html = `<p><i class="fas fa-info-circle"></i> No se encontró ningún partido para la pareja ${numeroPareja}</p>`;
             }
             
             resultadoDiv.innerHTML = html;
@@ -538,5 +557,113 @@ function buscarPareja() {
             console.error('Error:', error);
             resultadoDiv.innerHTML = `<p style="color: #d32f2f;"><i class="fas fa-exclamation-circle"></i> Error al buscar la pareja: ${error.message}</p>`;
             resultadoDiv.style.display = 'block';
+        });
+}
+
+/**
+ * Genera el Excel del árbol del campeonato
+ * @param {string} tipo - Tipo de campeonato (mus, tute, parchis)
+ */
+function generarExcelArbol(tipo) {
+    console.log(`Generando Excel del árbol del campeonato de ${tipo}`);
+    
+    const campeonatosRef = database.ref('campeonatos');
+    
+    campeonatosRef.once('value')
+        .then(snapshot => {
+            const data = snapshot.val();
+            if (!data || !data.datos || !data.parejas || !data.datos[tipo]) {
+                throw new Error('No hay datos disponibles para este campeonato');
+            }
+            
+            const campeonato = data.datos[tipo];
+            
+            // Ordenar las rondas por número
+            const rondas = Object.keys(campeonato).sort((a, b) => parseInt(a) - parseInt(b));
+            const totalRondas = rondas.length;
+            const partidosPrimeraRonda = campeonato[rondas[0]].length;
+            
+            // Calcular el número total de filas necesario basándonos en la primera ronda
+            // Para cada partido en la primera ronda, necesitamos 2 casillas (una para cada pareja)
+            // y un espacio entre partidos (excepto después del último)
+            const totalFilas = partidosPrimeraRonda * 3 - 1;
+            
+            // Crear una matriz vacía para nuestro worksheet
+            const worksheet = [];
+            for (let i = 0; i < totalFilas; i++) {
+                worksheet[i] = new Array(totalRondas * 2).fill("");
+            }
+            
+            // Para cada ronda
+            for (let rondaIndex = 0; rondaIndex < totalRondas; rondaIndex++) {
+                const ronda = rondas[rondaIndex];
+                const partidosRonda = campeonato[ronda];
+                const columna = rondaIndex * 2; // Usamos columnas pares para los datos
+                
+                // El espaciado entre grupos de parejas aumenta con cada ronda
+                const espaciadoGrupos = Math.pow(2, rondaIndex) * 3;
+                
+                // Para cada partido en esta ronda
+                for (let partidoIndex = 0; partidoIndex < partidosRonda.length; partidoIndex++) {
+                    const partido = partidosRonda[partidoIndex];
+                    
+                    // Calcular la fila base para este partido
+                    const filaBase = partidoIndex * espaciadoGrupos;
+                    
+                    // Añadir pareja 1
+                    if (isValidValue(partido.p1)) {
+                        worksheet[filaBase][columna] = partido.p1.toString();
+                    }
+                    
+                    // Añadir pareja 2 (una fila debajo)
+                    if (isValidValue(partido.p2)) {
+                        worksheet[filaBase + 1][columna] = partido.p2.toString();
+                    }
+                }
+            }
+            
+            // Convertir nuestra matriz a una hoja de Excel
+            const ws = XLSX.utils.aoa_to_sheet(worksheet);
+            
+            // Configurar ancho de columnas uniforme (aproximadamente 6.5 píxeles)
+            ws['!cols'] = Array(totalRondas * 2).fill({ width: 6.5 });
+            
+            // Añadir bordes a todas las celdas que contienen datos
+            for (let i = 0; i < totalFilas; i++) {
+                for (let j = 0; j < totalRondas * 2; j++) {
+                    // Solo añadir bordes a celdas con contenido
+                    if (worksheet[i][j]) {
+                        const cellRef = XLSX.utils.encode_cell({ r: i, c: j });
+                        if (!ws[cellRef]) ws[cellRef] = {};
+                        if (!ws[cellRef].s) ws[cellRef].s = {};
+                        
+                        // Añadir estilos de borde y alineación
+                        ws[cellRef].s = {
+                            border: {
+                                top: { style: "thin" },
+                                left: { style: "thin" },
+                                bottom: { style: "thin" },
+                                right: { style: "thin" }
+                            },
+                            alignment: { horizontal: "center", vertical: "center" }
+                        };
+                    }
+                }
+            }
+            
+            // Crear un libro Excel nuevo
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `Árbol ${tipo}`);
+            
+            // Generar archivo y descargarlo
+            const fechaActual = new Date().toLocaleDateString('es-ES').replace(/\//g, '-');
+            XLSX.writeFile(wb, `Arbol_${tipo}_${fechaActual}.xlsx`);
+            
+            console.log('Excel generado exitosamente');
+            alert(`Árbol de ${tipo} generado correctamente.`);
+        })
+        .catch(error => {
+            console.error('Error al generar Excel:', error);
+            alert(`Error al generar Excel: ${error.message}`);
         });
 } 
