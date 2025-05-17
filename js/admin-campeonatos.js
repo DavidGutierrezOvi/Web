@@ -296,21 +296,212 @@ function eliminarPareja(tipo, numero) {
 }
 
 /**
- * Crea un nuevo campeonato vacío
+ * Genera un número aleatorio entre min y max (inclusive)
+ * @param {number} min - Número mínimo
+ * @param {number} max - Número máximo
+ * @returns {number} Número aleatorio
+ */
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Mezcla un array de forma aleatoria (algoritmo Fisher-Yates)
+ * @param {Array} array - Array a mezclar
+ * @returns {Array} Array mezclado
+ */
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+/**
+ * Calcula el número de rondas necesarias basado en el número de parejas
+ * @param {number} numParejas - Número total de parejas
+ * @returns {number} Número de rondas necesarias
+ */
+function calcularNumeroRondas(numParejas) {
+    return Math.ceil(Math.log2(numParejas));
+}
+
+/**
+ * Genera los emparejamientos iniciales para el campeonato
+ * @param {Object} parejas - Objeto con las parejas del campeonato
+ * @returns {Object} Estructura de rondas con los emparejamientos
+ */
+function generarEmparejamientos(parejas) {
+    // Convertir las parejas en un array y mezclarlo
+    const parejasArray = Object.keys(parejas);
+    const numParejas = parejasArray.length;
+    
+    if (numParejas < 2) {
+        throw new Error('Se necesitan al menos 2 parejas para crear un campeonato');
+    }
+    
+    // Calcular el número de rondas necesarias
+    const numRondas = calcularNumeroRondas(numParejas);
+    const partidosPorRonda = Math.pow(2, numRondas - 1);
+    
+    // Mezclar las parejas aleatoriamente
+    const parejasMezcladas = shuffleArray([...parejasArray]);
+    
+    // Estructura para almacenar las rondas
+    const rondas = {};
+    
+    // Si el número de parejas no es potencia de 2, necesitamos ronda preliminar
+    if (numParejas > partidosPorRonda && numParejas < partidosPorRonda * 2) {
+        // Calcular cuántas parejas necesitan jugar la preliminar
+        const parejasEnPreliminar = (numParejas - partidosPorRonda) * 2;
+        const preliminares = parejasMezcladas.slice(0, parejasEnPreliminar);
+        const directos = parejasMezcladas.slice(parejasEnPreliminar);
+        
+        // Crear ronda preliminar
+        rondas["0"] = [];
+        for (let i = 0; i < preliminares.length; i += 2) {
+            rondas["0"].push({
+                p1: parseInt(preliminares[i]),
+                p2: parseInt(preliminares[i + 1]),
+                estado: "pendiente",
+                ganador: null
+            });
+        }
+        
+        // Primera ronda con ganadores de preliminar y parejas directas
+        rondas["1"] = [];
+        let indiceDirectos = 0;
+        
+        // Añadir espacios para los ganadores de preliminar
+        for (let i = 0; i < rondas["0"].length; i++) {
+            rondas["1"].push({
+                p1: null, // Se llenará con el ganador de la preliminar
+                p2: parseInt(directos[indiceDirectos++]),
+                estado: "pendiente",
+                ganador: null
+            });
+        }
+        
+        // Añadir parejas restantes
+        while (indiceDirectos < directos.length) {
+            rondas["1"].push({
+                p1: parseInt(directos[indiceDirectos++]),
+                p2: indiceDirectos < directos.length ? parseInt(directos[indiceDirectos++]) : null,
+                estado: "pendiente",
+                ganador: null
+            });
+        }
+    } else {
+        // Primera ronda normal sin preliminares
+        rondas["1"] = [];
+        for (let i = 0; i < parejasMezcladas.length; i += 2) {
+            rondas["1"].push({
+                p1: parseInt(parejasMezcladas[i]),
+                p2: i + 1 < parejasMezcladas.length ? parseInt(parejasMezcladas[i + 1]) : null,
+                estado: "pendiente",
+                ganador: null
+            });
+        }
+    }
+    
+    // Crear el resto de rondas vacías
+    for (let ronda = 2; ronda <= numRondas; ronda++) {
+        rondas[ronda] = [];
+        const numPartidos = Math.ceil(rondas[ronda - 1].length / 2);
+        for (let i = 0; i < numPartidos; i++) {
+            rondas[ronda].push({
+                p1: null,
+                p2: null,
+                estado: "pendiente",
+                ganador: null
+            });
+        }
+    }
+    
+    return rondas;
+}
+
+/**
+ * Crea un nuevo campeonato con emparejamientos aleatorios
  * @param {string} tipo - Tipo de campeonato (mus, tute, parchis)
  */
 function crearCampeonato(tipo) {
-    // Cargar datos actuales
-    database.ref(`campeonatos/datos/${tipo}`).set({
-        "1": []
-    })
-    .then(() => {
-        mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente`);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        mostrarError('Error al guardar los datos: ' + error.message);
-    });
+    // Obtener las parejas actuales
+    database.ref(`campeonatos/parejas/${tipo}`).once('value')
+        .then(snapshot => {
+            const parejas = snapshot.val();
+            
+            if (!parejas || Object.keys(parejas).length < 2) {
+                mostrarError('Se necesitan al menos 2 parejas para crear un campeonato');
+                return;
+            }
+            
+            // Comprobar si ya existe un campeonato
+            return database.ref(`campeonatos/datos/${tipo}`).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists() && Object.keys(snapshot.val()).length > 0) {
+                        return new Promise((resolve, reject) => {
+                            if (confirm(`Ya existe un campeonato de ${tipo}. ¿Quieres reiniciarlo con nuevos emparejamientos?`)) {
+                                resolve();
+                            } else {
+                                reject(new Error('Operación cancelada por el usuario'));
+                            }
+                        });
+                    }
+                })
+                .then(() => {
+                    try {
+                        // Generar emparejamientos aleatorios
+                        const rondas = generarEmparejamientos(parejas);
+                        
+                        // Guardar el campeonato en Firebase
+                        return database.ref(`campeonatos/datos/${tipo}`).set(rondas);
+                    } catch (error) {
+                        throw error;
+                    }
+                })
+                .then(() => {
+                    mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente con emparejamientos aleatorios`);
+                    
+                    // Mostrar resumen de emparejamientos
+                    mostrarResumenEmparejamientos(tipo, parejas);
+                });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarError(error.message);
+        });
+}
+
+/**
+ * Muestra un resumen de los emparejamientos generados
+ * @param {string} tipo - Tipo de campeonato
+ * @param {Object} parejas - Objeto con las parejas del campeonato
+ */
+function mostrarResumenEmparejamientos(tipo, parejas) {
+    database.ref(`campeonatos/datos/${tipo}`).once('value')
+        .then(snapshot => {
+            const rondas = snapshot.val();
+            let mensaje = '¡Emparejamientos generados!\n\n';
+            
+            if (rondas["0"]) {
+                mensaje += 'Ronda Preliminar:\n';
+                rondas["0"].forEach((partido, index) => {
+                    mensaje += `Partido ${index + 1}: Pareja #${partido.p1} vs Pareja #${partido.p2}\n`;
+                });
+                mensaje += '\n';
+            }
+            
+            mensaje += 'Primera Ronda:\n';
+            rondas["1"].forEach((partido, index) => {
+                const p1 = partido.p1 ? `Pareja #${partido.p1}` : 'Pendiente';
+                const p2 = partido.p2 ? `Pareja #${partido.p2}` : 'Pendiente';
+                mensaje += `Partido ${index + 1}: ${p1} vs ${p2}\n`;
+            });
+            
+            alert(mensaje);
+        });
 }
 
 /**
