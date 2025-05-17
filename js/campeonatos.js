@@ -27,34 +27,33 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Carga los datos de campeonatos desde el archivo JSON
+ * Carga los datos de campeonatos desde Firebase
  */
 function cargarDatosCampeonatos() {
-    fetch('../data/campeonatos_data.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('No se pudo cargar el archivo de campeonatos');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Generar árboles de campeonatos
-            generarArbolCampeonato('mus', data);
-            generarArbolCampeonato('tute', data);
-            generarArbolCampeonato('parchis', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            ['mus', 'tute', 'parchis'].forEach(tipo => {
-                document.getElementById(`${tipo}-bracket`).innerHTML = `
-                    <div class="error-container" style="text-align: center; padding: 20px;">
-                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #d32f2f;"></i>
-                        <h3>Error al cargar los datos</h3>
-                        <p>${error.message}</p>
-                    </div>
-                `;
-            });
+    const campeonatosRef = database.ref('campeonatos');
+    
+    campeonatosRef.on('value', (snapshot) => {
+        const data = snapshot.val() || {
+            parejas: { mus: {}, tute: {}, parchis: {} },
+            datos: { mus: {}, tute: {}, parchis: {} }
+        };
+        
+        // Generar árboles de campeonatos
+        generarArbolCampeonato('mus', data);
+        generarArbolCampeonato('tute', data);
+        generarArbolCampeonato('parchis', data);
+    }, (error) => {
+        console.error('Error:', error);
+        ['mus', 'tute', 'parchis'].forEach(tipo => {
+            document.getElementById(`${tipo}-bracket`).innerHTML = `
+                <div class="error-container" style="text-align: center; padding: 20px;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #d32f2f;"></i>
+                    <h3>Error al cargar los datos</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
         });
+    });
 }
 
 /**
@@ -227,9 +226,15 @@ function buscarPareja() {
         return;
     }
     
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
+    const campeonatosRef = database.ref('campeonatos');
+    
+    campeonatosRef.once('value')
+        .then(snapshot => {
+            const data = snapshot.val();
+            if (!data) {
+                throw new Error('No hay datos disponibles');
+            }
+            
             const campeonato = data.datos[tipoCampeonato];
             const parejas = data.parejas[tipoCampeonato];
             

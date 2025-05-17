@@ -40,30 +40,29 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Carga los datos de campeonatos desde el archivo JSON
+ * Carga los datos de campeonatos desde Firebase
  */
 function cargarDatosCampeonatos() {
-    fetch('../data/campeonatos_data.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('No se pudo cargar el archivo de campeonatos');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Cargar parejas y partidos para cada tipo de campeonato
-            cargarParejas('mus', data.parejas.mus);
-            cargarParejas('tute', data.parejas.tute);
-            cargarParejas('parchis', data.parejas.parchis);
-            
-            cargarPartidas('mus', data);
-            cargarPartidas('tute', data);
-            cargarPartidas('parchis', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos de campeonatos: ' + error.message);
-        });
+    const campeonatosRef = database.ref('campeonatos');
+    
+    campeonatosRef.on('value', (snapshot) => {
+        const data = snapshot.val() || {
+            parejas: { mus: {}, tute: {}, parchis: {} },
+            datos: { mus: {}, tute: {}, parchis: {} }
+        };
+        
+        // Cargar parejas y partidos para cada tipo de campeonato
+        cargarParejas('mus', data.parejas.mus);
+        cargarParejas('tute', data.parejas.tute);
+        cargarParejas('parchis', data.parejas.parchis);
+        
+        cargarPartidas('mus', data);
+        cargarPartidas('tute', data);
+        cargarPartidas('parchis', data);
+    }, (error) => {
+        console.error('Error:', error);
+        mostrarError('Error al cargar los datos de campeonatos: ' + error.message);
+    });
 }
 
 /**
@@ -263,48 +262,17 @@ function añadirPareja(tipo) {
     }
     
     // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Asegurarse de que las estructuras existen
-            if (!data.parejas) data.parejas = {};
-            if (!data.parejas[tipo]) data.parejas[tipo] = {};
-            
-            // Comprobar si ya existe una pareja con ese número
-            if (data.parejas[tipo][numero]) {
-                if (!confirm(`Ya existe una pareja con el número ${numero}. ¿Quieres sobrescribirla?`)) {
-                    return;
-                }
-            }
-            
-            // Añadir la nueva pareja
-            data.parejas[tipo][numero] = {
-                nombre1: nombre1,
-                nombre2: nombre2
-            };
-            
-            // Guardar los datos actualizados
-            guardarDatos(data)
-                .then(() => {
-                    // Recargar las parejas
-                    cargarParejas(tipo, data.parejas[tipo]);
-                    
-                    // Limpiar el formulario
-                    numeroInput.value = '';
-                    nombre1Input.value = '';
-                    nombre2Input.value = '';
-                    
-                    mostrarExito(`Pareja #${numero} añadida correctamente`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarError('Error al guardar los datos: ' + error.message);
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
-        });
+    database.ref(`campeonatos/parejas/${tipo}/${numero}`).set({
+        nombre1: nombre1,
+        nombre2: nombre2
+    })
+    .then(() => {
+        mostrarExito(`Pareja #${numero} añadida correctamente`);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -317,35 +285,14 @@ function eliminarPareja(tipo, numero) {
         return;
     }
     
-    // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Comprobar si la pareja existe
-            if (!data.parejas[tipo][numero]) {
-                mostrarError(`No existe una pareja con el número ${numero}`);
-                return;
-            }
-            
-            // Eliminar la pareja
-            delete data.parejas[tipo][numero];
-            
-            // Guardar los datos actualizados
-            guardarDatos(data)
-                .then(() => {
-                    // Recargar las parejas
-                    cargarParejas(tipo, data.parejas[tipo]);
-                    mostrarExito(`Pareja #${numero} eliminada correctamente`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarError('Error al guardar los datos: ' + error.message);
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
-        });
+    database.ref(`campeonatos/parejas/${tipo}/${numero}`).remove()
+    .then(() => {
+        mostrarExito(`Pareja #${numero} eliminada correctamente`);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -354,40 +301,16 @@ function eliminarPareja(tipo, numero) {
  */
 function crearCampeonato(tipo) {
     // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Asegurarse de que las estructuras existen
-            if (!data.datos) data.datos = {};
-            
-            // Comprobar si ya existe un campeonato
-            if (data.datos[tipo] && Object.keys(data.datos[tipo]).length > 0) {
-                if (!confirm(`Ya existe un campeonato de ${tipo}. ¿Quieres sobrescribirlo?`)) {
-                    return;
-                }
-            }
-            
-            // Crear el campeonato con una primera ronda vacía
-            data.datos[tipo] = {
-                "1": []
-            };
-            
-            // Guardar los datos actualizados
-            guardarDatos(data)
-                .then(() => {
-                    // Recargar las partidas
-                    cargarPartidas(tipo, data);
-                    mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarError('Error al guardar los datos: ' + error.message);
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
-        });
+    database.ref(`campeonatos/datos/${tipo}`).set({
+        "1": []
+    })
+    .then(() => {
+        mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente`);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -396,30 +319,14 @@ function crearCampeonato(tipo) {
  */
 function reiniciarCampeonato(tipo) {
     // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Eliminar el campeonato
-            if (data.datos && data.datos[tipo]) {
-                data.datos[tipo] = {};
-            }
-            
-            // Guardar los datos actualizados
-            guardarDatos(data)
-                .then(() => {
-                    // Recargar las partidas
-                    cargarPartidas(tipo, data);
-                    mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} reiniciado correctamente`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarError('Error al guardar los datos: ' + error.message);
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
-        });
+    database.ref(`campeonatos/datos/${tipo}`).set({})
+    .then(() => {
+        mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} reiniciado correctamente`);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -429,32 +336,14 @@ function reiniciarCampeonato(tipo) {
  */
 function añadirRonda(tipo, numeroRonda) {
     // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Asegurarse de que las estructuras existen
-            if (!data.datos) data.datos = {};
-            if (!data.datos[tipo]) data.datos[tipo] = {};
-            
-            // Añadir la nueva ronda
-            data.datos[tipo][numeroRonda.toString()] = [];
-            
-            // Guardar los datos actualizados
-            guardarDatos(data)
-                .then(() => {
-                    // Recargar las partidas
-                    cargarPartidas(tipo, data);
-                    mostrarExito(`Ronda ${numeroRonda} añadida correctamente`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarError('Error al guardar los datos: ' + error.message);
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
-        });
+    database.ref(`campeonatos/datos/${tipo}/${numeroRonda.toString()}`).set([])
+    .then(() => {
+        mostrarExito(`Ronda ${numeroRonda} añadida correctamente`);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -464,37 +353,18 @@ function añadirRonda(tipo, numeroRonda) {
  */
 function añadirPartido(tipo, ronda) {
     // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Asegurarse de que las estructuras existen
-            if (!data.datos) data.datos = {};
-            if (!data.datos[tipo]) data.datos[tipo] = {};
-            if (!data.datos[tipo][ronda]) data.datos[tipo][ronda] = [];
-            
-            // Añadir el nuevo partido
-            data.datos[tipo][ronda].push({
-                p1: null,
-                p2: null,
-                estado: "pendiente"
-            });
-            
-            // Guardar los datos actualizados
-            guardarDatos(data)
-                .then(() => {
-                    // Recargar las partidas
-                    cargarPartidas(tipo, data);
-                    mostrarExito('Partido añadido correctamente');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarError('Error al guardar los datos: ' + error.message);
-                });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
-        });
+    database.ref(`campeonatos/datos/${tipo}/${ronda}/${ronda.length}`).set({
+        p1: null,
+        p2: null,
+        estado: "pendiente"
+    })
+    .then(() => {
+        mostrarExito('Partido añadido correctamente');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al guardar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -505,113 +375,104 @@ function añadirPartido(tipo, ronda) {
  */
 function editarPartido(tipo, ronda, partidoIndex) {
     // Cargar datos actuales
-    fetch('../data/campeonatos_data.json')
-        .then(response => response.json())
-        .then(data => {
-            const partido = data.datos[tipo][ronda][partidoIndex];
-            const parejas = data.parejas[tipo];
-            
-            // Crear un string con las opciones de parejas disponibles
-            let opcionesParejas = '<option value="">-- Seleccionar --</option>';
-            for (const numero in parejas) {
-                opcionesParejas += `<option value="${numero}">${numero} - ${parejas[numero].nombre1} / ${parejas[numero].nombre2}</option>`;
-            }
-            
-            // Crear el HTML del modal
-            const modalHTML = `
-                <div class="modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-                    <div class="modal-content" style="background-color: #fff; border-radius: 8px; padding: 20px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
-                        <h3>Editar Partido</h3>
-                        <div class="form-group">
-                            <label for="edit-p1">Pareja 1</label>
-                            <select id="edit-p1" class="form-control">
-                                ${opcionesParejas}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-p2">Pareja 2</label>
-                            <select id="edit-p2" class="form-control">
-                                ${opcionesParejas}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-estado">Estado</label>
-                            <select id="edit-estado" class="form-control">
-                                <option value="pendiente">Pendiente</option>
-                                <option value="jugando">En juego</option>
-                                <option value="completado">Completado</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-ganador">Ganador</label>
-                            <select id="edit-ganador" class="form-control">
-                                <option value="">Sin ganador</option>
-                                <option value="p1">Pareja 1</option>
-                                <option value="p2">Pareja 2</option>
-                            </select>
-                        </div>
-                        <div class="form-actions" style="display: flex; justify-content: space-between; margin-top: 20px;">
-                            <button id="btn-cancelar" class="btn btn-danger">Cancelar</button>
-                            <button id="btn-guardar" class="btn btn-primary">Guardar</button>
-                        </div>
+    database.ref(`campeonatos/datos/${tipo}/${ronda}/${partidoIndex}`).once('value')
+    .then(snapshot => {
+        const partido = snapshot.val();
+        const parejas = database.ref(`campeonatos/parejas/${tipo}`).val();
+        
+        // Crear un string con las opciones de parejas disponibles
+        let opcionesParejas = '<option value="">-- Seleccionar --</option>';
+        for (const numero in parejas) {
+            opcionesParejas += `<option value="${numero}">${numero} - ${parejas[numero].nombre1} / ${parejas[numero].nombre2}</option>`;
+        }
+        
+        // Crear el HTML del modal
+        const modalHTML = `
+            <div class="modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                <div class="modal-content" style="background-color: #fff; border-radius: 8px; padding: 20px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+                    <h3>Editar Partido</h3>
+                    <div class="form-group">
+                        <label for="edit-p1">Pareja 1</label>
+                        <select id="edit-p1" class="form-control">
+                            ${opcionesParejas}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-p2">Pareja 2</label>
+                        <select id="edit-p2" class="form-control">
+                            ${opcionesParejas}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-estado">Estado</label>
+                        <select id="edit-estado" class="form-control">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="jugando">En juego</option>
+                            <option value="completado">Completado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-ganador">Ganador</label>
+                        <select id="edit-ganador" class="form-control">
+                            <option value="">Sin ganador</option>
+                            <option value="p1">Pareja 1</option>
+                            <option value="p2">Pareja 2</option>
+                        </select>
+                    </div>
+                    <div class="form-actions" style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <button id="btn-cancelar" class="btn btn-danger">Cancelar</button>
+                        <button id="btn-guardar" class="btn btn-primary">Guardar</button>
                     </div>
                 </div>
-            `;
-            
-            // Añadir el modal al DOM
-            const modalElement = document.createElement('div');
-            modalElement.innerHTML = modalHTML;
-            document.body.appendChild(modalElement);
-            
-            // Configurar los valores iniciales
-            const p1Select = document.getElementById('edit-p1');
-            const p2Select = document.getElementById('edit-p2');
-            const estadoSelect = document.getElementById('edit-estado');
-            const ganadorSelect = document.getElementById('edit-ganador');
-            
-            if (partido.p1 !== null) p1Select.value = partido.p1;
-            if (partido.p2 !== null) p2Select.value = partido.p2;
-            estadoSelect.value = partido.estado;
-            if (partido.ganador) ganadorSelect.value = partido.ganador;
-            
-            // Configurar los botones
-            document.getElementById('btn-cancelar').addEventListener('click', () => {
-                document.body.removeChild(modalElement);
-            });
-            
-            document.getElementById('btn-guardar').addEventListener('click', () => {
-                // Actualizar los datos del partido
-                partido.p1 = p1Select.value ? parseInt(p1Select.value) : null;
-                partido.p2 = p2Select.value ? parseInt(p2Select.value) : null;
-                partido.estado = estadoSelect.value;
-                partido.ganador = ganadorSelect.value || null;
-                
-                // Guardar los datos actualizados
-                guardarDatos(data)
-                    .then(() => {
-                        // Cerrar el modal
-                        document.body.removeChild(modalElement);
-                        
-                        // Recargar las partidas
-                        cargarPartidas(tipo, data);
-                        
-                        // Actualizar los árboles si hay un ganador
-                        if (partido.ganador && partido.estado === 'completado') {
-                            actualizarSiguienteRonda(tipo, ronda, partidoIndex, partido.ganador === 'p1' ? partido.p1 : partido.p2, data);
-                        }
-                        
-                        mostrarExito('Partido actualizado correctamente');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        mostrarError('Error al guardar los datos: ' + error.message);
-                    });
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            mostrarError('Error al cargar los datos: ' + error.message);
+            </div>
+        `;
+        
+        // Añadir el modal al DOM
+        const modalElement = document.createElement('div');
+        modalElement.innerHTML = modalHTML;
+        document.body.appendChild(modalElement);
+        
+        // Configurar los valores iniciales
+        const p1Select = document.getElementById('edit-p1');
+        const p2Select = document.getElementById('edit-p2');
+        const estadoSelect = document.getElementById('edit-estado');
+        const ganadorSelect = document.getElementById('edit-ganador');
+        
+        if (partido.p1 !== null) p1Select.value = partido.p1;
+        if (partido.p2 !== null) p2Select.value = partido.p2;
+        estadoSelect.value = partido.estado;
+        if (partido.ganador) ganadorSelect.value = partido.ganador;
+        
+        // Configurar los botones
+        document.getElementById('btn-cancelar').addEventListener('click', () => {
+            document.body.removeChild(modalElement);
         });
+        
+        document.getElementById('btn-guardar').addEventListener('click', () => {
+            // Actualizar los datos del partido
+            database.ref(`campeonatos/datos/${tipo}/${ronda}/${partidoIndex}/p1`).set(p1Select.value ? parseInt(p1Select.value) : null);
+            database.ref(`campeonatos/datos/${tipo}/${ronda}/${partidoIndex}/p2`).set(p2Select.value ? parseInt(p2Select.value) : null);
+            database.ref(`campeonatos/datos/${tipo}/${ronda}/${partidoIndex}/estado`).set(estadoSelect.value);
+            database.ref(`campeonatos/datos/${tipo}/${ronda}/${partidoIndex}/ganador`).set(ganadorSelect.value || null);
+            
+            // Recargar las partidas
+            cargarPartidas(tipo, database.ref(`campeonatos/datos/${tipo}`).val());
+            
+            // Actualizar los árboles si hay un ganador
+            if (ganadorSelect.value && estadoSelect.value === 'completado') {
+                actualizarSiguienteRonda(tipo, ronda, partidoIndex, ganadorSelect.value === 'p1' ? partido.p1 : partido.p2, database.ref(`campeonatos/datos/${tipo}`).val());
+            }
+            
+            // Cerrar el modal
+            document.body.removeChild(modalElement);
+            
+            mostrarExito('Partido actualizado correctamente');
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarError('Error al cargar los datos: ' + error.message);
+    });
 }
 
 /**
@@ -626,7 +487,7 @@ function actualizarSiguienteRonda(tipo, rondaActual, partidoIndex, ganador, data
     const siguienteRonda = (parseInt(rondaActual) + 1).toString();
     
     // Comprobar si existe la siguiente ronda
-    if (!data.datos[tipo][siguienteRonda]) {
+    if (!data[siguienteRonda]) {
         return;
     }
     
@@ -634,9 +495,9 @@ function actualizarSiguienteRonda(tipo, rondaActual, partidoIndex, ganador, data
     const siguientePartidoIndex = Math.floor(partidoIndex / 2);
     
     // Comprobar si existe el partido en la siguiente ronda
-    if (!data.datos[tipo][siguienteRonda][siguientePartidoIndex]) {
+    if (!data[siguienteRonda][siguientePartidoIndex]) {
         // Si no existe, lo creamos
-        data.datos[tipo][siguienteRonda][siguientePartidoIndex] = {
+        data[siguienteRonda][siguientePartidoIndex] = {
             p1: null,
             p2: null,
             estado: "pendiente"
@@ -648,50 +509,30 @@ function actualizarSiguienteRonda(tipo, rondaActual, partidoIndex, ganador, data
     
     // Actualizar el partido de la siguiente ronda
     if (esP1) {
-        data.datos[tipo][siguienteRonda][siguientePartidoIndex].p1 = ganador;
+        data[siguienteRonda][siguientePartidoIndex].p1 = ganador;
     } else {
-        data.datos[tipo][siguienteRonda][siguientePartidoIndex].p2 = ganador;
+        data[siguienteRonda][siguientePartidoIndex].p2 = ganador;
     }
     
     // Guardar los datos actualizados
-    guardarDatos(data);
+    database.ref(`campeonatos/datos/${tipo}/${siguienteRonda}/${siguientePartidoIndex}`).set(data[siguienteRonda][siguientePartidoIndex]);
 }
 
 /**
- * Guarda los datos en el archivo JSON
+ * Guarda los datos en Firebase
  * @param {Object} data - Datos a guardar
  * @returns {Promise} Promesa que se resuelve cuando los datos se han guardado
  */
 function guardarDatos(data) {
-    // Aquí simularíamos una llamada a la API para guardar los datos
-    // En un entorno real, esto enviaría una petición POST/PUT a un endpoint que actualizaría el archivo JSON
-    
-    return new Promise((resolve, reject) => {
-        // Simulamos una petición a una API con fetch
-        fetch('../api/guardar-campeonatos.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+    return database.ref('campeonatos').set(data)
+        .then(() => {
+            // El guardado fue exitoso
+            return Promise.resolve();
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al guardar los datos');
-            }
-            resolve();
-        })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error al guardar los datos:', error);
-            
-            // En caso de error, mostramos una advertencia pero simulamos éxito
-            // SOLO PARA DEMO - En producción, esto debería rechazar la promesa
-            alert('Error al guardar los datos. En un entorno real, los cambios no se guardarían.');
-            
-            // Simular éxito para la demo
-            resolve();
+            return Promise.reject(error);
         });
-    });
 }
 
 /**

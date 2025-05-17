@@ -353,6 +353,31 @@
         </div>
     </footer>
 
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <!-- Configuración de Firebase -->
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA__5cfEqA4P4WV58TwG_RI4Y2khYe8DW4",
+            authDomain: "pena-el-cuervo.firebaseapp.com",
+            databaseURL: "https://pena-el-cuervo-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pena-el-cuervo",
+            storageBucket: "pena-el-cuervo.firebasestorage.app",
+            messagingSenderId: "607425328497",
+            appId: "1:607425328497:web:7b32973130881c335ff2d0",
+            measurementId: "G-1QN2LVNB0W"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Referencia a la base de datos
+        const database = firebase.database();
+    </script>
+
     <script src="../js/admin-campeonatos.js"></script>
 </body>
 </html> 
