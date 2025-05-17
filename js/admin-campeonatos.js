@@ -333,9 +333,13 @@ function calcularNumeroRondas(numParejas) {
  * @returns {Object} Estructura de rondas con los emparejamientos
  */
 function generarEmparejamientos(parejas) {
+    console.log('Iniciando generación de emparejamientos con parejas:', parejas);
+    
     // Convertir las parejas en un array y mezclarlo
     const parejasArray = Object.keys(parejas);
     const numParejas = parejasArray.length;
+    
+    console.log('Número de parejas:', numParejas);
     
     if (numParejas < 2) {
         throw new Error('Se necesitan al menos 2 parejas para crear un campeonato');
@@ -345,18 +349,26 @@ function generarEmparejamientos(parejas) {
     const numRondas = calcularNumeroRondas(numParejas);
     const partidosPorRonda = Math.pow(2, numRondas - 1);
     
+    console.log('Número de rondas:', numRondas);
+    console.log('Partidos por ronda:', partidosPorRonda);
+    
     // Mezclar las parejas aleatoriamente
     const parejasMezcladas = shuffleArray([...parejasArray]);
+    console.log('Parejas mezcladas:', parejasMezcladas);
     
     // Estructura para almacenar las rondas
     const rondas = {};
     
     // Si el número de parejas no es potencia de 2, necesitamos ronda preliminar
     if (numParejas > partidosPorRonda && numParejas < partidosPorRonda * 2) {
+        console.log('Creando ronda preliminar');
         // Calcular cuántas parejas necesitan jugar la preliminar
         const parejasEnPreliminar = (numParejas - partidosPorRonda) * 2;
         const preliminares = parejasMezcladas.slice(0, parejasEnPreliminar);
         const directos = parejasMezcladas.slice(parejasEnPreliminar);
+        
+        console.log('Parejas en preliminar:', preliminares);
+        console.log('Parejas directas:', directos);
         
         // Crear ronda preliminar
         rondas["0"] = [];
@@ -393,6 +405,7 @@ function generarEmparejamientos(parejas) {
             });
         }
     } else {
+        console.log('Creando primera ronda sin preliminares');
         // Primera ronda normal sin preliminares
         rondas["1"] = [];
         for (let i = 0; i < parejasMezcladas.length; i += 2) {
@@ -419,6 +432,7 @@ function generarEmparejamientos(parejas) {
         }
     }
     
+    console.log('Estructura final de rondas:', rondas);
     return rondas;
 }
 
@@ -427,19 +441,24 @@ function generarEmparejamientos(parejas) {
  * @param {string} tipo - Tipo de campeonato (mus, tute, parchis)
  */
 function crearCampeonato(tipo) {
+    console.log('Iniciando creación de campeonato de', tipo);
+    
     // Obtener las parejas actuales
     database.ref(`campeonatos/parejas/${tipo}`).once('value')
         .then(snapshot => {
             const parejas = snapshot.val();
+            console.log('Parejas obtenidas:', parejas);
             
             if (!parejas || Object.keys(parejas).length < 2) {
-                mostrarError('Se necesitan al menos 2 parejas para crear un campeonato');
-                return;
+                throw new Error('Se necesitan al menos 2 parejas para crear un campeonato');
             }
             
             // Comprobar si ya existe un campeonato
             return database.ref(`campeonatos/datos/${tipo}`).once('value')
                 .then(snapshot => {
+                    const campeonatoExistente = snapshot.val();
+                    console.log('Campeonato existente:', campeonatoExistente);
+                    
                     if (snapshot.exists() && Object.keys(snapshot.val()).length > 0) {
                         return new Promise((resolve, reject) => {
                             if (confirm(`Ya existe un campeonato de ${tipo}. ¿Quieres reiniciarlo con nuevos emparejamientos?`)) {
@@ -453,23 +472,31 @@ function crearCampeonato(tipo) {
                 .then(() => {
                     try {
                         // Generar emparejamientos aleatorios
+                        console.log('Generando emparejamientos...');
                         const rondas = generarEmparejamientos(parejas);
+                        console.log('Emparejamientos generados:', rondas);
                         
                         // Guardar el campeonato en Firebase
+                        console.log('Guardando en Firebase...');
                         return database.ref(`campeonatos/datos/${tipo}`).set(rondas);
                     } catch (error) {
+                        console.error('Error al generar emparejamientos:', error);
                         throw error;
                     }
                 })
                 .then(() => {
+                    console.log('Campeonato guardado exitosamente');
                     mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente con emparejamientos aleatorios`);
                     
                     // Mostrar resumen de emparejamientos
                     mostrarResumenEmparejamientos(tipo, parejas);
+                    
+                    // Recargar la vista
+                    cargarPartidas(tipo, { datos: { [tipo]: rondas }, parejas: { [tipo]: parejas } });
                 });
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error en crearCampeonato:', error);
             mostrarError(error.message);
         });
 }
