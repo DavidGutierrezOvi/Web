@@ -287,8 +287,47 @@ function getEstadoTexto(estado) {
  * @returns {Object|null} Información del origen del rival o null
  */
 function buscarOrigenRival(campeonato, rondaActual, partidoActual, posicionRival) {
-    // Si estamos en la ronda 1, no hay partido anterior
-    if (rondaActual === "1" || rondaActual === 1) return null;
+    // Si estamos en la ronda 1, verificamos si existe una ronda "0" o "preliminar"
+    if (rondaActual === "1" || rondaActual === 1) {
+        // Verificar si existe una ronda "0" o "preliminar"
+        if (campeonato["0"] || campeonato["preliminar"]) {
+            const rondaPrevia = campeonato["0"] ? "0" : "preliminar";
+            
+            // Calcular el índice del partido en la ronda preliminar
+            // Esta lógica puede variar según la estructura del torneo
+            let partidoPrevioIndice = posicionRival === 'p1' ? partidoActual * 2 : partidoActual * 2 + 1;
+            
+            // Verificar si existe ese partido en la ronda preliminar
+            if (!campeonato[rondaPrevia][partidoPrevioIndice]) {
+                // Probar con fórmulas alternativas si es necesario
+                partidoPrevioIndice = Math.floor(partidoActual / 2);
+                
+                if (!campeonato[rondaPrevia][partidoPrevioIndice]) {
+                    return null;
+                }
+            }
+            
+            const partidoPrevio = campeonato[rondaPrevia][partidoPrevioIndice];
+            
+            // Asegurarnos que el partido previo existe y tiene la estructura correcta
+            if (!partidoPrevio) return null;
+            
+            // Verificar y corregir p1 y p2 si son "undefined"
+            if (partidoPrevio.p1 === "undefined") partidoPrevio.p1 = null;
+            if (partidoPrevio.p2 === "undefined") partidoPrevio.p2 = null;
+            
+            return {
+                ronda: rondaPrevia,
+                indice: partidoPrevioIndice,
+                partido: partidoPrevio,
+                equipo1: partidoPrevio.p1,
+                equipo2: partidoPrevio.p2,
+                posicion: posicionRival
+            };
+        }
+        
+        return null;
+    }
     
     const rondaAnterior = (parseInt(rondaActual) - 1).toString();
     
@@ -479,7 +518,9 @@ function buscarPareja() {
                                 html += `
                                     <div class="rival-info" style="background:#f5f5f5; padding:10px; border-radius:5px; margin-top:10px;">
                                         <p><i class="fas fa-info-circle"></i> <strong>Información del rival:</strong></p>
-                                        <p>Tu rival aún no está definido. Espera a que se complete la ronda anterior.</p>
+                                        ${ronda === "1" || ronda === 1 ? 
+                                        `<p>Tu rival aún no está definido. En la primera ronda, los rivales suelen asignarse directamente por la organización del torneo.</p>` :
+                                        `<p>Tu rival aún no está definido. Espera a que se complete la ronda anterior.</p>`}
                                     </div>
                                 `;
                             }
