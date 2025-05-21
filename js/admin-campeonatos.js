@@ -244,20 +244,35 @@ function cargarPartidas(tipo, data) {
  */
 function añadirPareja(tipo) {
     const form = document.getElementById(`form-parejas-${tipo}`);
+    const numeroInput = form.querySelector('[name="numero"]').value.trim();
     const nombre1 = form.querySelector('[name="nombre1"]').value.trim();
     const nombre2 = form.querySelector('[name="nombre2"]').value.trim();
     
-    if (!nombre1 || !nombre2) {
-        mostrarError('Por favor, introduce los nombres de ambos jugadores');
+    if (!numeroInput || !nombre1 || !nombre2) {
+        mostrarError('Por favor, introduce el número de pareja y los nombres de ambos jugadores');
         return;
     }
     
-    database.ref(`campeonatos/parejas/${tipo}`).once('value')
+    // Convertir a número entero
+    const numero = parseInt(numeroInput);
+    
+    // Verificar que sea un número válido
+    if (isNaN(numero) || numero <= 0) {
+        mostrarError('El número de pareja debe ser un valor numérico positivo');
+        return;
+    }
+    
+    // Verificar si ya existe una pareja con ese número
+    database.ref(`campeonatos/parejas/${tipo}/${numero}`).once('value')
         .then(snapshot => {
-            const parejas = snapshot.val() || {};
-            const nuevoNumero = Object.keys(parejas).length + 1;
+            if (snapshot.exists()) {
+                if (!confirm(`Ya existe una pareja con el número ${numero}. ¿Deseas sobrescribirla?`)) {
+                    return Promise.reject(new Error('Operación cancelada por el usuario'));
+                }
+            }
             
-            return database.ref(`campeonatos/parejas/${tipo}/${nuevoNumero}`).set({
+            // Guardar la pareja con el número especificado
+            return database.ref(`campeonatos/parejas/${tipo}/${numero}`).set({
                 nombre1,
                 nombre2
             });
@@ -266,7 +281,11 @@ function añadirPareja(tipo) {
             form.reset();
             mostrarExito('Pareja añadida correctamente');
         })
-        .catch(error => mostrarError('Error al añadir la pareja: ' + error.message));
+        .catch(error => {
+            if (error.message !== 'Operación cancelada por el usuario') {
+                mostrarError('Error al añadir la pareja: ' + error.message);
+            }
+        });
 }
 
 /**
