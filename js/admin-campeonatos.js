@@ -380,11 +380,10 @@ function crearCampeonato(tipo) {
                     return database.ref(`campeonatos/datos/${tipo}`).set(rondasGeneradas)
                         .then(() => {
                             console.log('Campeonato guardado exitosamente');
-                            mostrarExito(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente con emparejamientos aleatorios`);
+                            // Solo log de consola, sin alerta
+                            console.log(`Campeonato de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)} creado correctamente con emparejamientos aleatorios`);
                             
-                            // Mostrar resumen de emparejamientos y preguntar por PDF
-                            mostrarResumenEmparejamientos(tipo, parejas);
-                            
+                            // Ya no mostramos resumen de emparejamientos
                             // Recargar partidas con los datos actualizados
                             database.ref('campeonatos').once('value').then(snapshot => {
                                 const dataActualizada = snapshot.val();
@@ -834,17 +833,8 @@ function reiniciarCampeonato(tipo) {
  * Muestra un resumen de los emparejamientos generados
  */
 function mostrarResumenEmparejamientos(tipo, parejas) {
-    database.ref(`campeonatos/datos/${tipo}`).once('value')
-        .then(snapshot => {
-            const rondas = snapshot.val();
-            if (!rondas) return;
-            
-            let mensaje = `¡Emparejamientos generados para ${tipo.toUpperCase()}!`;
-            
-            // Ya no preguntamos, simplemente registramos en consola
-            console.log(mensaje);
-        })
-        .catch(error => console.error('Error al obtener emparejamientos:', error));
+    // Función ahora vacía para evitar alertas adicionales
+    console.log(`Emparejamientos generados para ${tipo}`);
 }
 
 /**
@@ -991,12 +981,11 @@ function generarExcelArbol(tipo, rondas) {
 
     // Generar las posiciones iniciales: 1, 2, 4, 8, ...
     const primerasFilas = [];
-    for (let i = 0; i < numRondas; i++) {
+    for (let i = 0; i < numRondas + 1; i++) { // +1 para la columna extra
         primerasFilas.push(Math.pow(2, i));
     }
 
     // Separaciones entre partidos por ronda: 1, 3, 7, 15, ...
-    // Fórmula: 2^(ronda + 1) - 1
     function calcularSeparacion(ronda) {
         return Math.pow(2, ronda + 1) - 1;
     }
@@ -1006,13 +995,12 @@ function generarExcelArbol(tipo, rondas) {
         separaciones[i] = calcularSeparacion(i);
     }
 
-    // Control de rango para el Excel
     let minRow = 100000, maxRow = 0, minCol = 100000, maxCol = 0;
 
     rondasOrdenadas.forEach((rondaKey, i) => {
         const partidosOriginal = rondas[rondaKey] || [];
         const partidosDuplicados = partidosOriginal.concat(partidosOriginal); // duplicamos la info
-        const colBase = i * 2; // A, C, E, ...
+        const colBase = i * 2;
 
         const filaInicial = primerasFilas[i];
         const espaciado = separaciones[i];
@@ -1022,7 +1010,7 @@ function generarExcelArbol(tipo, rondas) {
             const cell = XLSX.utils.encode_cell({ r: fila, c: colBase });
 
             ws[cell] = {
-                v: '', // Aquí podrías usar partidosDuplicados[p] si quieres mostrar texto
+                v: '', // O partidosDuplicados[p] si quieres mostrar texto
                 t: 's',
                 s: {
                     border: {
@@ -1041,19 +1029,46 @@ function generarExcelArbol(tipo, rondas) {
         }
     });
 
+    // Añadir columna extra con una única celda siguiendo la serie de primerasFilas
+    const colExtra = numRondas * 2;
+    const filaExtra = primerasFilas[numRondas]; // sigue la serie
+
+    const cellExtra = XLSX.utils.encode_cell({ r: filaExtra, c: colExtra });
+
+    ws[cellExtra] = {
+        v: '', // puedes poner un texto aquí si quieres
+        t: 's',
+        s: {
+            border: {
+                top: { style: 'thin', color: { rgb: "000000" } },
+                bottom: { style: 'thin', color: { rgb: "000000" } },
+                left: { style: 'thin', color: { rgb: "000000" } },
+                right: { style: 'thin', color: { rgb: "000000" } }
+            }
+        }
+    };
+
+    minRow = Math.min(minRow, filaExtra);
+    maxRow = Math.max(maxRow, filaExtra);
+    minCol = Math.min(minCol, colExtra);
+    maxCol = Math.max(maxCol, colExtra);
+
     // Establecer rango visible
     ws['!ref'] = XLSX.utils.encode_range({
         s: { c: minCol, r: minRow },
         e: { c: maxCol, r: maxRow }
     });
 
-    ws['!cols'] = Array(numRondas * 2).fill({ wch: 10 });
+    // Columnas pequeñas (solo para número)
+    ws['!cols'] = Array(numRondas * 2 + 1).fill({ wch: 10 });
+
     XLSX.utils.book_append_sheet(wb, ws, "Árbol de Torneo");
     XLSX.writeFile(wb, `arbol_torneo_${tipo}.xlsx`);
 
     console.log("Excel generado y guardado correctamente");
     mostrarExito("Excel con árbol generado correctamente");
 }
+
 
 
 
