@@ -7,7 +7,7 @@
         "dia": "26",
         "mes": "Jul",
         "hora": "14:30",
-        "ubicacion": "Plaza de pueblo",
+        "ubicacion": "Plaza",
         "descripcion": "Paella organizada por 'Arroces el valle' gratis para todos los socios",
         "categoria": "convivencia"
       },
@@ -18,8 +18,8 @@
         "dia": "26",
         "mes": "Jul",
         "hora": "22:00",
-        "ubicacion": "Plaza del pueblo",
-        "descripcion": "Barbacoa organizada por la peña amenizada con un bingo y música",
+        "ubicacion": "Plaza",
+        "descripcion": "Barbacoa organizada por la peña amenizada con un bingo y música (precios populares)",
         "categoria": "convivencia"
       },
       {
@@ -35,12 +35,12 @@
       },
       {
         "id": 4,
-        "titulo": "Discoteca Movil 'Seven'",
+        "titulo": "Discoteca Movil 'DJSERGIOJZ'",
         "fecha": "2025-07-31T00:00:00",
         "dia": "31",
         "mes": "Jul",
         "hora": "00:00",
-        "ubicacion": "Plaza de pueblo",
+        "ubicacion": "Plaza",
         "descripcion": "",
         "categoria": "fiestas"
       },
@@ -50,7 +50,7 @@
         "fecha": "2025-08-01T00:00:00",
         "dia": "1",
         "mes": "Ago",
-        "hora": "12:00",
+        "hora": "12:30",
         "ubicacion": "Plaza",
         "descripcion": "Concurso de dibujo infantil con premios para los gandores. Animate a participar",
         "categoria": "fiestas"
@@ -61,8 +61,8 @@
         "fecha": "2025-08-01T00:00:00",
         "dia": "1",
         "mes": "Ago",
-        "hora": "18:00",
-        "ubicacion": "Casa de la Cultura",
+        "hora": "17:00",
+        "ubicacion": "Plaza - Bar Alcon",
         "descripcion": "La primera partida debe estar jugada antes del Sábado a las 14:00, se jugará con 3 fichas hasta semifinales",
         "categoria": "fiestas"
       },
@@ -96,7 +96,7 @@
         "mes": "Ago",
         "hora": "13:30",
         "ubicacion": "Plaza",
-        "descripcion": "Tirada de huevos, para adultos y niños. ¿Cuanto podrás aguantar sin que se rompar el huevo?",
+        "descripcion": "Tirada de huevos, para adultos y niños. ¿Cuanto podrás aguantar sin que se rompa el huevo?",
         "categoria": "fiestas"
       },
       {
@@ -105,7 +105,7 @@
         "fecha": "2025-08-02T00:00:00",
         "dia": "2",
         "mes": "Ago",
-        "hora": "20:00",
+        "hora": "17:00",
         "ubicacion": "Plaza",
         "descripcion": "Se jugará al mejor de 5, cada juego a 30 fichas, a partir de semifinales se jugara a 3 vacas",
         "categoria": "fiestas"
@@ -116,9 +116,9 @@
         "fecha": "2025-08-02T00:00:00",
         "dia": "2",
         "mes": "Ago",
-        "hora": "18:30",
+        "hora": "18:00",
         "ubicacion": "Plaza",
-        "descripcion": "Juegos para los mas pequeños amenizado con una merienda para todos los asistenes",
+        "descripcion": "Juegos para los mas pequeños amenizado con una merienda para todos los asistentes",
         "categoria": "fiestas"
       },
       {
@@ -173,7 +173,7 @@
         "mes": "Ago",
         "hora": "21:00",
         "ubicacion": "Plaza",
-        "descripcion": "Ven disfrazado y disfruta con el resto de niños, se dará un regalo a todos los que participen",
+        "descripcion": "Ven disfrazado y disfruta con el resto del pueblo, se dará un pequeño detalle a todos los que participen",
         "categoria": "fiestas"
       },
       {
@@ -182,14 +182,14 @@
         "fecha": "2025-08-03T00:00:00",
         "dia": "3",
         "mes": "Ago",
-        "hora": "22:30",
+        "hora": "21:30",
         "ubicacion": "Plaza",
-        "descripcion": "",
+        "descripcion": "Se entregaran los premios al acabar los disfraces infantiles.",
         "categoria": "fiestas"
       },
       {
         "id": 18,
-        "titulo": "Baile de disfrazes",
+        "titulo": "Baile de disfraces",
         "fecha": "2025-08-03T00:00:00",
         "dia": "3",
         "mes": "Ago",
@@ -200,13 +200,13 @@
       },
       {
         "id": 19,
-        "titulo": "Limpieza y recojida de la plaza",
+        "titulo": "Limpieza y recogida de la plaza",
         "fecha": "2025-08-04T00:00:00",
         "dia": "4",
         "mes": "Ago",
         "hora": "13:00",
         "ubicacion": "Plaza",
-        "descripcion": "Ayudanos a recojer y limpiar la plaza, las fiestas son de todos, también recogemos todos",
+        "descripcion": "Ayudanos a recoger y limpiar la plaza, las fiestas son de todos, cuanto menos ensuciemos, menos limpiamos",
         "categoria": "semana_cultural"
       },
       {
@@ -226,7 +226,7 @@
         "fecha": "2025-08-06T00:00:00",
         "dia": "6",
         "mes": "Ago",
-        "hora": "19:30",
+        "hora": "20:00",
         "ubicacion": "Pistas de fútbol",
         "descripcion": "Animate a jugar, lo pasaremos en grande",
         "categoria": "semana_cultural"
@@ -261,11 +261,22 @@
         "mes": "Ago",
         "hora": "23:00",
         "ubicacion": "Plaza",
-        "descripcion": "Se harán mojitos en la plaza, todo ello animado con música",
+        "descripcion": "Se harán mojitos en la plaza, todo ello animado con música y bingo (precios populares)",
         "categoria": "semana_cultural"
       },
       {
         "id": 25,
+        "titulo": "Campeonato de calva",
+        "fecha": "2025-08-08T00:00:00",
+        "dia": "8",
+        "mes": "Ago",
+        "hora": "19:00",
+        "ubicacion": "Río",
+        "descripcion": "Concurso de calva local, no profesional, animate a participar y echarte unas risas",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 26,
         "titulo": "Teatro",
         "fecha": "2025-08-08T00:00:00",
         "dia": "8",
@@ -276,15 +287,27 @@
         "categoria": "semana_cultural"
       },
       {
-        "id": 26,
+        "id": 27,
+        "titulo": "Fiesta del agua",
+        "fecha": "2025-08-09T00:00:00",
+        "dia": "9",
+        "mes": "Ago",
+        "hora": "15:00",
+        "ubicacion": "Plaza",
+        "descripcion": "",
+        "categoria": "semana_cultural"
+      },
+      {
+        "id": 28,
         "titulo": "Campeonato de calva",
         "fecha": "2025-08-09T00:00:00",
         "dia": "9",
         "mes": "Ago",
-        "hora": "19:00",
+        "hora": "19:30",
         "ubicacion": "Río",
-        "descripcion": "Concurso para todos los miembros de la peña",
+        "descripcion": "Ultimas rondas de nuestro campeonato de calva",
         "categoria": "semana_cultural"
       }
+
     ]
 }
