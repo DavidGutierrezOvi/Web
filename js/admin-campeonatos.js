@@ -279,6 +279,12 @@ function añadirPareja(tipo) {
         })
         .then(() => {
             form.reset();
+            // Cargar las parejas actualizadas inmediatamente
+            database.ref(`campeonatos/parejas/${tipo}`).once('value')
+                .then(snapshot => {
+                    const parejas = snapshot.val() || {};
+                    cargarParejas(tipo, parejas);
+                });
             mostrarExito('Pareja añadida correctamente');
         })
         .catch(error => {
@@ -294,7 +300,15 @@ function añadirPareja(tipo) {
 function eliminarPareja(tipo, numero) {
     // Eliminamos sin preguntar
     database.ref(`campeonatos/parejas/${tipo}/${numero}`).remove()
-        .then(() => mostrarExito('Pareja eliminada correctamente'))
+        .then(() => {
+            // Cargar las parejas actualizadas inmediatamente
+            database.ref(`campeonatos/parejas/${tipo}`).once('value')
+                .then(snapshot => {
+                    const parejas = snapshot.val() || {};
+                    cargarParejas(tipo, parejas);
+                });
+            mostrarExito('Pareja eliminada correctamente');
+        })
         .catch(error => mostrarError('Error al eliminar la pareja: ' + error.message));
 }
 

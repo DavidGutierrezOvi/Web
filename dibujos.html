@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dibujos Infantiles - Peña El Cuervo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos específicos para la galería de dibujos */
+        .dibujos-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .dibujo-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            aspect-ratio: 1/1; /* Proporción cuadrada para los dibujos */
+        }
+        
+        .dibujo-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .dibujo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .dibujo-autor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(106, 13, 173, 0.8); /* Fondo morado con transparencia */
+            color: var(--secondary-color); /* Texto amarillo */
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        /* Ajustes para dispositivos móviles */
+        @media (max-width: 768px) {
+            .dibujos-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dibujos-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header y navegación -->
+    <header>
+        <div class="logo-container">
+            <h1><span class="nombre-pena"> Peña El Cuervo</span></h1>
+            <div class="logo-icon"><i class="fas fa-crow"></i></div>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="fiestas.html">Fiestas</a></li>
+                <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+                <li><a href="dibujos.html" class="active">Dibujos Infantiles</a></li>
+                <li><a href="campeonatos.html">Campeonatos</a></li>
+            </ul>
+        </nav>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- Encabezado de página -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Dibujos Infantiles</h1>
+            <p>Galería de dibujos realizados por los niños y niñas del pueblo</p>
+        </div>
+    </div>
+
+    <section class="fiestas-anteriores">
+        <div class="container">
+            <div class="dibujos-gallery">
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo1.jpg" alt="Dibujo Infantil 1">
+                    <div class="dibujo-autor">Dibujo 1</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo2.jpg" alt="Dibujo Infantil 2">
+                    <div class="dibujo-autor">Dibujo 2</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo3.jpg" alt="Dibujo Infantil 3">
+                    <div class="dibujo-autor">Dibujo 3</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo4.jpg" alt="Dibujo Infantil 4">
+                    <div class="dibujo-autor">Dibujo 4</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo5.jpg" alt="Dibujo Infantil 5">
+                    <div class="dibujo-autor">Dibujo 5</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo6.jpg" alt="Dibujo Infantil 6">
+                    <div class="dibujo-autor">Dibujo 6</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo7.jpg" alt="Dibujo Infantil 7">
+                    <div class="dibujo-autor">Dibujo 7</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo8.jpg" alt="Dibujo Infantil 8">
+                    <div class="dibujo-autor">Dibujo 8</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo9.jpg" alt="Dibujo Infantil 9">
+                    <div class="dibujo-autor">Dibujo 9</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo10.jpg" alt="Dibujo Infantil 10">
+                    <div class="dibujo-autor">Dibujo 10</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo11.jpg" alt="Dibujo Infantil 11">
+                    <div class="dibujo-autor">Dibujo 11</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo12.jpg" alt="Dibujo Infantil 12">
+                    <div class="dibujo-autor">Dibujo 12</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo13.jpg" alt="Dibujo Infantil 13">
+                    <div class="dibujo-autor">Dibujo 13</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo14.jpg" alt="Dibujo Infantil 14">
+                    <div class="dibujo-autor">Dibujo 14</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo15.jpg" alt="Dibujo Infantil 15">
+                    <div class="dibujo-autor">Dibujo 15</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo16.jpg" alt="Dibujo Infantil 16">
+                    <div class="dibujo-autor">Dibujo 16</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo17.jpg" alt="Dibujo Infantil 17">
+                    <div class="dibujo-autor">Dibujo 17</div>
+                </div>
+                
+                <div class="dibujo-item">
+                    <img src="img/dibujos/Dibujo18.jpg" alt="Dibujo Infantil 18">
+                    <div class="dibujo-autor">Dibujo 18</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Peña El Cuervo</h3>
+                    <p>Tu lugar de encuentro para celebrar, compartir y disfrutar</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/penaelcuervo" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/p_el_cuervo_navacepe?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Peña El Cuervo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Visor de dibujos ampliados -->
+    <div class="cartel-ampliado" id="dibujo-ampliado">
+        <span class="cerrar">&times;</span>
+        <img src="" alt="Dibujo ampliado">
+        <div class="year"></div>
+    </div>
+
+    <script>
+        // Funcionalidad para el menú móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            // Menú móvil
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navMenu = document.querySelector('nav');
+            
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('active');
+                });
+            }
+            
+            // Funcionalidad para los dibujos (vista ampliada)
+            const dibujos = document.querySelectorAll('.dibujo-item');
+            const dibujoAmpliado = document.getElementById('dibujo-ampliado');
+            
+            dibujos.forEach(dibujo => {
+                dibujo.addEventListener('click', function() {
+                    const imgSrc = this.querySelector('img').src;
+                    const autor = this.querySelector('.dibujo-autor').textContent;
+                    
+                    // Mostrar el dibujo ampliado
+                    dibujoAmpliado.querySelector('img').src = imgSrc;
+                    dibujoAmpliado.querySelector('.year').textContent = autor;
+                    dibujoAmpliado.querySelector('.year').style.display = 'block';
+                    dibujoAmpliado.classList.add('activo');
+                });
+            });
+            
+            // Cerrar el dibujo ampliado
+            if (dibujoAmpliado) {
+                dibujoAmpliado.addEventListener('click', function() {
+                    this.classList.remove('activo');
+                });
+                
+                const cerrarBtn = dibujoAmpliado.querySelector('.cerrar');
+                if (cerrarBtn) {
+                    cerrarBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        dibujoAmpliado.classList.remove('activo');
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
