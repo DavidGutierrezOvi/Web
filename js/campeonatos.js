@@ -227,8 +227,352 @@ function generarArbolCampeonato(tipo, data) {
             </div>
         `;
     });
-    
+
+    html += renderizarArbolHorizontal(tipo, campeonato, parejas, rondas);
+
     bracket.innerHTML = html;
+
+    const horizontalSection = bracket.querySelector('.horizontal-bracket-section');
+    if (horizontalSection) {
+        inicializarLienzoHorizontal(horizontalSection);
+    }
+}
+
+/**
+ * Renderiza el árbol horizontal del campeonato
+ * @param {string} tipo - Tipo de campeonato
+ * @param {Object} campeonato - Datos del campeonato
+ * @param {Object} parejas - Datos de las parejas
+ * @param {Array} rondas - Rondas ordenadas
+ * @returns {string} HTML del árbol horizontal
+ */
+function renderizarArbolHorizontal(tipo, campeonato, parejas, rondas) {
+    const layout = calcularLayoutHorizontal(campeonato, rondas);
+
+    if (!layout.nodes.length) {
+        return '';
+    }
+
+    const titulo = `Árbol horizontal de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+    const ancho = layout.width + 80;
+    const alto = layout.height + 80;
+
+    const encabezadosRonda = rondas.map((ronda, index) => {
+        const x = layout.leftMargin + (index * layout.roundGap);
+        return `
+            <div class="horizontal-round-header" style="left:${x}px; width:${layout.nodeWidth}px;">
+                ${getNombreRonda(ronda, rondas.length)}
+            </div>
+        `;
+    }).join('');
+
+    const svgPaths = layout.connectors.map(connector => `
+        <path d="${connector.path}" class="horizontal-connector ${connector.estadoClase}" />
+    `).join('');
+
+    const nodos = layout.nodes.map(node => {
+        const partido = node.partido || {};
+        const estadoClase = getEstadoClase(partido.estado);
+        const estadoTexto = getEstadoTexto(partido.estado);
+        const numero1 = isValidValue(partido.p1) ? partido.p1 : '—';
+        const numero2 = isValidValue(partido.p2) ? partido.p2 : '—';
+        const ganador1 = partido.ganador === 'p1';
+        const ganador2 = partido.ganador === 'p2';
+
+        return `
+            <article class="horizontal-match ${estadoClase}" style="left:${node.x}px; top:${node.y}px; width:${node.width}px; height:${node.height}px;">
+                <div class="horizontal-match-head">
+                    <div class="horizontal-match-badge">${estadoTexto}</div>
+                </div>
+                <div class="horizontal-match-teams">
+                    <span class="horizontal-team-number ${ganador1 ? 'winner' : ''}">#${numero1}</span>
+                    <span class="horizontal-team-number ${ganador2 ? 'winner' : ''}">#${numero2}</span>
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    return `
+        <div class="horizontal-bracket-section" data-horizontal-canvas="${tipo}">
+            <div class="horizontal-bracket-header">
+                <h3>${titulo}</h3>
+                <p>Arrastra para mover el árbol y usa la rueda del ratón para ampliar o reducir la vista.</p>
+                <div class="horizontal-bracket-controls">
+                    <button type="button" class="horizontal-control-btn" data-action="zoom-out">-</button>
+                    <button type="button" class="horizontal-control-btn" data-action="fit">Ajustar</button>
+                    <button type="button" class="horizontal-control-btn" data-action="reset">Reset</button>
+                    <button type="button" class="horizontal-control-btn" data-action="zoom-in">+</button>
+                </div>
+            </div>
+            <div class="horizontal-bracket-viewport">
+                <div class="horizontal-bracket-stage" data-stage="${tipo}" style="width:${ancho}px; height:${alto}px;">
+                    <div class="horizontal-round-headers">
+                        ${encabezadosRonda}
+                    </div>
+                    <svg class="horizontal-connector-layer" width="${ancho}" height="${alto}" viewBox="0 0 ${ancho} ${alto}" preserveAspectRatio="none" aria-hidden="true">
+                        ${svgPaths}
+                    </svg>
+                    ${nodos}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Inicializa los controles de la vista horizontal tipo lienzo
+ * @param {HTMLElement} section - Sección del árbol horizontal
+ */
+function inicializarLienzoHorizontal(section) {
+    const viewport = section.querySelector('.horizontal-bracket-viewport');
+    const stage = section.querySelector('.horizontal-bracket-stage');
+    const controls = section.querySelectorAll('.horizontal-control-btn');
+
+    if (!viewport || !stage) {
+        return;
+    }
+
+    const state = {
+        scale: 1,
+        panX: 0,
+        panY: 0,
+        minScale: 0.35,
+        maxScale: 2.5,
+        dragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        dragOriginX: 0,
+        dragOriginY: 0
+    };
+
+    section._horizontalState = state;
+
+    const applyTransform = () => {
+        stage.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+    };
+
+    const fitToViewport = () => {
+        const viewportRect = viewport.getBoundingClientRect();
+        const stageWidth = parseFloat(stage.style.width) || stage.offsetWidth;
+        const stageHeight = parseFloat(stage.style.height) || stage.offsetHeight;
+        const padding = 48;
+        const fitScale = Math.min(
+            (viewportRect.width - padding) / stageWidth,
+            (viewportRect.height - padding) / stageHeight,
+            1
+        );
+        state.scale = Math.max(state.minScale, Math.min(fitScale, state.maxScale));
+        const visibleWidth = stageWidth * state.scale;
+        const visibleHeight = stageHeight * state.scale;
+        state.panX = Math.max((viewportRect.width - visibleWidth) / 2, 24);
+        state.panY = Math.max((viewportRect.height - visibleHeight) / 2, 24);
+        applyTransform();
+    };
+
+    const zoomAtPoint = (factor, clientX, clientY) => {
+        const rect = viewport.getBoundingClientRect();
+        const pointX = clientX - rect.left;
+        const pointY = clientY - rect.top;
+        const oldScale = state.scale;
+        const newScale = Math.max(state.minScale, Math.min(oldScale * factor, state.maxScale));
+
+        const worldX = (pointX - state.panX) / oldScale;
+        const worldY = (pointY - state.panY) / oldScale;
+
+        state.scale = newScale;
+        state.panX = pointX - (worldX * newScale);
+        state.panY = pointY - (worldY * newScale);
+        applyTransform();
+    };
+
+    controls.forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.dataset.action;
+            const rect = viewport.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            switch (action) {
+                case 'zoom-in':
+                    zoomAtPoint(1.15, centerX, centerY);
+                    break;
+                case 'zoom-out':
+                    zoomAtPoint(0.87, centerX, centerY);
+                    break;
+                case 'fit':
+                    fitToViewport();
+                    break;
+                case 'reset':
+                    state.scale = 1;
+                    state.panX = 0;
+                    state.panY = 0;
+                    applyTransform();
+                    break;
+                default:
+                    break;
+            }
+        });
+    });
+
+    viewport.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        const factor = event.deltaY < 0 ? 1.1 : 0.9;
+        zoomAtPoint(factor, event.clientX, event.clientY);
+    }, { passive: false });
+
+    viewport.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        state.dragging = true;
+        state.dragStartX = event.clientX;
+        state.dragStartY = event.clientY;
+        state.dragOriginX = state.panX;
+        state.dragOriginY = state.panY;
+        viewport.setPointerCapture(event.pointerId);
+        viewport.classList.add('is-dragging');
+    });
+
+    viewport.addEventListener('pointermove', (event) => {
+        if (!state.dragging) {
+            return;
+        }
+
+        state.panX = state.dragOriginX + (event.clientX - state.dragStartX);
+        state.panY = state.dragOriginY + (event.clientY - state.dragStartY);
+        applyTransform();
+    });
+
+    const stopDragging = (event) => {
+        if (!state.dragging) {
+            return;
+        }
+
+        state.dragging = false;
+        viewport.classList.remove('is-dragging');
+
+        if (viewport.hasPointerCapture(event.pointerId)) {
+            viewport.releasePointerCapture(event.pointerId);
+        }
+    };
+
+    viewport.addEventListener('pointerup', stopDragging);
+    viewport.addEventListener('pointercancel', stopDragging);
+    viewport.addEventListener('mouseleave', () => {
+        state.dragging = false;
+        viewport.classList.remove('is-dragging');
+    });
+
+    window.addEventListener('resize', fitToViewport, { once: true });
+    setTimeout(fitToViewport, 0);
+}
+
+/**
+ * Calcula posiciones y conexiones del árbol horizontal
+ * @param {Object} campeonato - Datos del campeonato
+ * @param {Array} rondas - Rondas ordenadas
+ * @returns {Object} Layout calculado
+ */
+function calcularLayoutHorizontal(campeonato, rondas) {
+    const NODE_WIDTH = 210;
+    const NODE_HEIGHT = 92;
+    const ROUND_GAP = 250;
+    const VERTICAL_GAP = 20;
+    const HEADER_SPACE = 44;
+    const TOP_MARGIN = 20 + HEADER_SPACE;
+    const LEFT_MARGIN = 20;
+
+    const nodes = [];
+    const nodesPorRonda = {};
+    const connectors = [];
+    let maxBottom = 0;
+
+    rondas.forEach((ronda, roundIndex) => {
+        const partidos = campeonato[ronda] || [];
+        nodesPorRonda[ronda] = [];
+
+        partidos.forEach((partido, matchIndex) => {
+            let y;
+
+            if (roundIndex === 0) {
+                y = TOP_MARGIN + matchIndex * (NODE_HEIGHT + VERTICAL_GAP);
+            } else {
+                const rondaAnterior = rondas[roundIndex - 1];
+                const padreA = nodesPorRonda[rondaAnterior][matchIndex * 2];
+                const padreB = nodesPorRonda[rondaAnterior][matchIndex * 2 + 1];
+
+                if (padreA && padreB) {
+                    y = ((padreA.y + NODE_HEIGHT / 2) + (padreB.y + NODE_HEIGHT / 2)) / 2 - NODE_HEIGHT / 2;
+                } else if (padreA) {
+                    y = padreA.y;
+                } else if (padreB) {
+                    y = padreB.y;
+                } else {
+                    y = TOP_MARGIN + matchIndex * (NODE_HEIGHT + VERTICAL_GAP);
+                }
+            }
+
+            const node = {
+                ronda,
+                roundIndex,
+                matchIndex,
+                partido,
+                x: LEFT_MARGIN + roundIndex * ROUND_GAP,
+                y,
+                width: NODE_WIDTH,
+                height: NODE_HEIGHT
+            };
+
+            nodes.push(node);
+            nodesPorRonda[ronda].push(node);
+            maxBottom = Math.max(maxBottom, y + NODE_HEIGHT);
+        });
+    });
+
+    rondas.forEach((ronda, roundIndex) => {
+        if (roundIndex === 0) {
+            return;
+        }
+
+        const rondaAnterior = rondas[roundIndex - 1];
+        const partidos = campeonato[ronda] || [];
+
+        partidos.forEach((partido, matchIndex) => {
+            const parent = nodesPorRonda[ronda][matchIndex];
+            const childA = nodesPorRonda[rondaAnterior][matchIndex * 2];
+            const childB = nodesPorRonda[rondaAnterior][matchIndex * 2 + 1];
+
+            [childA, childB].forEach(child => {
+                if (!child) {
+                    return;
+                }
+
+                const startX = child.x + NODE_WIDTH;
+                const startY = child.y + NODE_HEIGHT / 2;
+                const endX = parent.x;
+                const endY = parent.y + NODE_HEIGHT / 2;
+                const elbowX = startX + ((endX - startX) / 2);
+                const estadoClase = getEstadoClase(partido.estado);
+
+                connectors.push({
+                    path: `M ${startX} ${startY} H ${elbowX} V ${endY} H ${endX}`,
+                    estadoClase
+                });
+            });
+        });
+    });
+
+    return {
+        nodes,
+        connectors,
+        width: LEFT_MARGIN + ((rondas.length - 1) * ROUND_GAP) + NODE_WIDTH + LEFT_MARGIN,
+        height: maxBottom + TOP_MARGIN,
+        leftMargin: LEFT_MARGIN,
+        roundGap: ROUND_GAP,
+        nodeWidth: NODE_WIDTH,
+        headerSpace: HEADER_SPACE
+    };
 }
 
 /**
