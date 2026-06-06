@@ -18,10 +18,17 @@
     box-sizing: border-box;
 }
 
+html {
+    height: 100%;
+    background-color: var(--primary-lighter);
+}
+
 body {
     font-family: var(--font-primary);
     color: var(--text-color);
     line-height: 1.6;
+    background-color: var(--primary-lighter);
+    min-height: 100vh;
 }
 
 .container {
