@@ -476,91 +476,205 @@ function inicializarLienzoHorizontal(section) {
  */
 function calcularLayoutHorizontal(campeonato, rondas) {
     const NODE_WIDTH = 210;
-    const NODE_HEIGHT = 92;
+    const NODE_HEIGHT = 108;
     const ROUND_GAP = 250;
-    const VERTICAL_GAP = 20;
+    const VERTICAL_GAP = 30;
     const HEADER_SPACE = 44;
     const TOP_MARGIN = 20 + HEADER_SPACE;
     const LEFT_MARGIN = 20;
+    const MIN_SEPARATION = NODE_HEIGHT + VERTICAL_GAP;
 
     const nodes = [];
     const nodesPorRonda = {};
+    const nodeByKey = {};
+    const incomingByDestination = {};
+    const links = [];
     const connectors = [];
     let maxBottom = 0;
 
+    const getKey = (ronda, matchIndex) => `${String(ronda)}:${matchIndex}`;
+
+    const obtenerDestinoPartido = (ronda, matchIndex, partido) => {
+        if (partido && partido.destino) {
+            const destinoRonda = String(partido.destino.ronda);
+            const destinoPartido = parseInt(partido.destino.partido, 10);
+            const destinoPosicion = partido.destino.posicion === 'p2' ? 'p2' : 'p1';
+
+            if (campeonato[destinoRonda] && campeonato[destinoRonda][destinoPartido]) {
+                return {
+                    ronda: destinoRonda,
+                    matchIndex: destinoPartido,
+                    posicion: destinoPosicion,
+                    porDestinoExplicito: true
+                };
+            }
+        }
+
+        const rondaNum = parseInt(ronda, 10);
+        const siguienteRonda = String(rondaNum + 1);
+        const partidosSiguiente = campeonato[siguienteRonda];
+        if (!Array.isArray(partidosSiguiente) || partidosSiguiente.length === 0) {
+            return null;
+        }
+
+        if (rondaNum === 0 && matchIndex < partidosSiguiente.length) {
+            return {
+                ronda: siguienteRonda,
+                matchIndex,
+                posicion: 'p1',
+                porDestinoExplicito: false
+            };
+        }
+
+        const destinoPartido = Math.floor(matchIndex / 2);
+        if (!partidosSiguiente[destinoPartido]) {
+            return null;
+        }
+
+        return {
+            ronda: siguienteRonda,
+            matchIndex: destinoPartido,
+            posicion: matchIndex % 2 === 1 ? 'p2' : 'p1',
+            porDestinoExplicito: false
+        };
+    };
+
+    // Crear nodos con posición base por índice (de arriba hacia abajo).
     rondas.forEach((ronda, roundIndex) => {
         const partidos = campeonato[ronda] || [];
         nodesPorRonda[ronda] = [];
 
         partidos.forEach((partido, matchIndex) => {
-            let y;
-
-            if (roundIndex === 0) {
-                y = TOP_MARGIN + matchIndex * (NODE_HEIGHT + VERTICAL_GAP);
-            } else {
-                const rondaAnterior = rondas[roundIndex - 1];
-                const padreA = nodesPorRonda[rondaAnterior][matchIndex * 2];
-                const padreB = nodesPorRonda[rondaAnterior][matchIndex * 2 + 1];
-
-                if (padreA && padreB) {
-                    y = ((padreA.y + NODE_HEIGHT / 2) + (padreB.y + NODE_HEIGHT / 2)) / 2 - NODE_HEIGHT / 2;
-                } else if (padreA) {
-                    y = padreA.y;
-                } else if (padreB) {
-                    y = padreB.y;
-                } else {
-                    y = TOP_MARGIN + matchIndex * (NODE_HEIGHT + VERTICAL_GAP);
-                }
-            }
-
             const node = {
                 ronda,
                 roundIndex,
                 matchIndex,
                 partido,
                 x: LEFT_MARGIN + roundIndex * ROUND_GAP,
-                y,
+                y: TOP_MARGIN + matchIndex * (NODE_HEIGHT + VERTICAL_GAP),
                 width: NODE_WIDTH,
                 height: NODE_HEIGHT
             };
 
             nodes.push(node);
             nodesPorRonda[ronda].push(node);
-            maxBottom = Math.max(maxBottom, y + NODE_HEIGHT);
+            nodeByKey[getKey(ronda, matchIndex)] = node;
         });
     });
 
+    // Construir grafo de relaciones reales entre partidos.
     rondas.forEach((ronda, roundIndex) => {
-        if (roundIndex === 0) {
+        if (roundIndex >= rondas.length - 1) {
             return;
         }
 
-        const rondaAnterior = rondas[roundIndex - 1];
         const partidos = campeonato[ronda] || [];
-
         partidos.forEach((partido, matchIndex) => {
-            const parent = nodesPorRonda[ronda][matchIndex];
-            const childA = nodesPorRonda[rondaAnterior][matchIndex * 2];
-            const childB = nodesPorRonda[rondaAnterior][matchIndex * 2 + 1];
+            const sourceKey = getKey(ronda, matchIndex);
+            const destino = obtenerDestinoPartido(ronda, matchIndex, partido);
 
-            [childA, childB].forEach(child => {
-                if (!child) {
-                    return;
-                }
+            if (!destino) {
+                return;
+            }
 
-                const startX = child.x + NODE_WIDTH;
-                const startY = child.y + NODE_HEIGHT / 2;
-                const endX = parent.x;
-                const endY = parent.y + NODE_HEIGHT / 2;
-                const elbowX = startX + ((endX - startX) / 2);
-                const estadoClase = getEstadoClase(partido.estado);
+            const destKey = getKey(destino.ronda, destino.matchIndex);
+            if (!nodeByKey[destKey]) {
+                return;
+            }
 
-                connectors.push({
-                    path: `M ${startX} ${startY} H ${elbowX} V ${endY} H ${endX}`,
-                    estadoClase
-                });
-            });
+            if (!incomingByDestination[destKey]) {
+                incomingByDestination[destKey] = [];
+            }
+
+            incomingByDestination[destKey].push({ sourceKey, posicion: destino.posicion });
+            links.push({ sourceKey, destKey });
         });
+    });
+
+    const alinearRondaPorOrigen = (nodesRonda) => {
+        nodesRonda.forEach((node) => {
+            const destKey = getKey(node.ronda, node.matchIndex);
+            const incoming = incomingByDestination[destKey] || [];
+
+            if (!incoming.length) {
+                return;
+            }
+
+            const centros = incoming
+                .map(link => nodeByKey[link.sourceKey])
+                .filter(Boolean)
+                .map(sourceNode => sourceNode.y + (NODE_HEIGHT / 2));
+
+            if (!centros.length) {
+                return;
+            }
+
+            const mediaCentro = centros.reduce((acc, value) => acc + value, 0) / centros.length;
+            node.y = mediaCentro - (NODE_HEIGHT / 2);
+        });
+    };
+
+    const resolverColisionesSinReordenar = (nodesRonda) => {
+        if (!nodesRonda.length) {
+            return;
+        }
+
+        // Mantener orden natural del cuadro (matchIndex), solo corrigiendo alturas.
+        const ordenados = [...nodesRonda].sort((a, b) => a.matchIndex - b.matchIndex);
+
+        // Empuje hacia abajo.
+        for (let i = 1; i < ordenados.length; i++) {
+            const previo = ordenados[i - 1];
+            const actual = ordenados[i];
+            const minY = previo.y + MIN_SEPARATION;
+
+            if (actual.y < minY) {
+                actual.y = minY;
+            }
+        }
+
+        // Ajuste global para no dejar la columna fuera del margen superior.
+        const desplazamiento = TOP_MARGIN - ordenados[0].y;
+        if (desplazamiento > 0) {
+            ordenados.forEach(node => {
+                node.y += desplazamiento;
+            });
+        }
+    };
+
+    // Calcular Y por propagación de izquierda a derecha, respetando orden natural en cada ronda.
+    for (let roundIndex = 1; roundIndex < rondas.length; roundIndex++) {
+        const ronda = rondas[roundIndex];
+        const nodesRonda = nodesPorRonda[ronda] || [];
+
+        alinearRondaPorOrigen(nodesRonda);
+        resolverColisionesSinReordenar(nodesRonda);
+    }
+
+    // Generar líneas con las posiciones ya corregidas.
+    links.forEach(link => {
+        const source = nodeByKey[link.sourceKey];
+        const destination = nodeByKey[link.destKey];
+
+        if (!source || !destination) {
+            return;
+        }
+
+        const startX = source.x + NODE_WIDTH;
+        const startY = source.y + NODE_HEIGHT / 2;
+        const endX = destination.x;
+        const endY = destination.y + NODE_HEIGHT / 2;
+        const elbowX = startX + ((endX - startX) / 2);
+        const estadoClase = getEstadoClase(destination.partido && destination.partido.estado);
+
+        connectors.push({
+            path: `M ${startX} ${startY} H ${elbowX} V ${endY} H ${endX}`,
+            estadoClase
+        });
+    });
+
+    nodes.forEach(node => {
+        maxBottom = Math.max(maxBottom, node.y + NODE_HEIGHT);
     });
 
     return {
