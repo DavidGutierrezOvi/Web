@@ -421,7 +421,7 @@ function generarEmparejamientos(parejas) {
     console.log('Iniciando generación de emparejamientos con parejas:', parejas);
     
     // Convertir las parejas en un array y mezclarlo
-    const parejasArray = Object.keys(parejas);
+    const parejasArray = Object.keys(parejas).map(Number);
     const numParejas = parejasArray.length;
     
     console.log('Número de parejas:', numParejas);
@@ -436,172 +436,151 @@ function generarEmparejamientos(parejas) {
     
     // Estructura para almacenar las rondas
     const rondas = {};
-    
-    // Calcular el número de rondas necesarias
-    const numRondas = calcularNumeroRondas(numParejas);
-    const partidosPorRonda = Math.pow(2, numRondas - 1);
-    
-    console.log('Número de rondas calculado inicialmente:', numRondas);
-    console.log('Partidos por ronda:', partidosPorRonda);
-    
-    // Si el número de parejas no es potencia de 2, necesitamos ronda preliminar
-    if (numParejas > partidosPorRonda && numParejas < partidosPorRonda * 2) {
-        console.log('Creando ronda preliminar');
-        // Calcular cuántas parejas necesitan jugar la preliminar
-        const parejasEnPreliminar = (numParejas - partidosPorRonda) * 2;
-        const preliminares = parejasMezcladas.slice(0, parejasEnPreliminar);
-        const directos = parejasMezcladas.slice(parejasEnPreliminar);
-        
-        console.log('Parejas en preliminar:', preliminares);
-        console.log('Parejas directas:', directos);
-        
-        // Crear ronda preliminar
-        rondas["0"] = [];
-        for (let i = 0; i < preliminares.length; i += 2) {
-            if (i + 1 < preliminares.length) {  // Asegurarse de que hay un rival
-                rondas["0"].push({
-                    p1: Number(preliminares[i]),
-                    p2: Number(preliminares[i + 1]),
-                    estado: "pendiente",
-                    ganador: null
-                });
-            } else {
-                // Si queda una pareja sin rival, pasa directamente a la siguiente ronda
-                directos.push(preliminares[i]);
-            }
-        }
-        
-        // Primera ronda con ganadores de preliminar y parejas directas
+
+    const crearPartido = (p1 = null, p2 = null) => ({
+        p1,
+        p2,
+        estado: "pendiente",
+        ganador: null
+    });
+
+    const esPotenciaDeDos = (n) => n > 0 && (n & (n - 1)) === 0;
+
+    if (esPotenciaDeDos(numParejas)) {
+        console.log('Creando primera ronda sin preliminares');
         rondas["1"] = [];
-        let indiceDirectos = 0;
-        
-        // Añadir espacios para los ganadores de preliminar
-        for (let i = 0; i < rondas["0"].length; i++) {
-            if (indiceDirectos < directos.length) {
-                rondas["1"].push({
-                    p1: null, // Se llenará con el ganador de la preliminar
-                    p2: Number(directos[indiceDirectos++]),
-                    estado: "pendiente",
-                    ganador: null
-                });
-            } else {
-                rondas["1"].push({
-                    p1: null, // Se llenará con el ganador de la preliminar
-                    p2: null,
-                    estado: "pendiente",
-                    ganador: null
-                });
-            }
-        }
-        
-        // Añadir parejas restantes
-        while (indiceDirectos < directos.length) {
-            if (indiceDirectos + 1 < directos.length) {
-                rondas["1"].push({
-                    p1: Number(directos[indiceDirectos++]),
-                    p2: Number(directos[indiceDirectos++]),
-                    estado: "pendiente",
-                    ganador: null
-                });
-            } else {
-                // Si queda una pareja sin rival, pasa directamente
-                rondas["1"].push({
-                    p1: Number(directos[indiceDirectos++]),
-                    p2: null,
-                    estado: "pendiente",
-                    ganador: null
-                });
-            }
-        }
-        
-        // Recalcular el número de rondas basado en el número de partidos en la ronda 1
-        const numPartidosRonda1 = rondas["1"].length;
-        const rondasRestantes = Math.ceil(Math.log2(numPartidosRonda1));
-        console.log(`Con ${numPartidosRonda1} partidos en ronda 1, necesitamos ${rondasRestantes} rondas más`);
-        
-        // Crear el resto de rondas necesarias (desde 2 hasta la final)
-        let rondaActual = 2;
-        let numPartidosRondaAnterior = numPartidosRonda1;
-        
-        while (numPartidosRondaAnterior > 1) {
-            const numPartidosRondaActual = Math.ceil(numPartidosRondaAnterior / 2);
-            rondas[rondaActual] = [];
-            
-            for (let i = 0; i < numPartidosRondaActual; i++) {
-                rondas[rondaActual].push({
-                    p1: null,
-                    p2: null,
-                    estado: "pendiente",
-                    ganador: null
-                });
-            }
-            
-            numPartidosRondaAnterior = numPartidosRondaActual;
-            rondaActual++;
-        }
-        
-        // Corregir para que la ronda final tenga solo 1 partido
-        if (rondas[rondaActual - 1] && rondas[rondaActual - 1].length > 1) {
-            rondas[rondaActual - 1] = [{
-                p1: null,
-                p2: null,
-                estado: "pendiente",
-                ganador: null
-            }];
+
+        for (let i = 0; i < parejasMezcladas.length; i += 2) {
+            rondas["1"].push(crearPartido(Number(parejasMezcladas[i]), Number(parejasMezcladas[i + 1])));
         }
     } else {
-        console.log('Creando primera ronda sin preliminares');
-        // Primera ronda normal sin preliminares
+        console.log('Creando ronda preliminar y cuadro principal equilibrado');
+
+        // Potencia de 2 inmediatamente inferior: tamaño objetivo tras preliminares.
+        const baseEquipos = Math.pow(2, Math.floor(Math.log2(numParejas)));
+        const numPartidosPreliminar = numParejas - baseEquipos;
+        const equiposEnPreliminar = numPartidosPreliminar * 2;
+
+        const preliminares = parejasMezcladas.slice(0, equiposEnPreliminar).map(Number);
+        const directos = parejasMezcladas.slice(equiposEnPreliminar).map(Number);
+
+        console.log('Base del cuadro tras preliminar:', baseEquipos);
+        console.log('Partidos preliminar:', numPartidosPreliminar);
+        console.log('Parejas en preliminar:', preliminares);
+        console.log('Parejas directas:', directos);
+
+        rondas["0"] = [];
+        for (let i = 0; i < preliminares.length; i += 2) {
+            rondas["0"].push(crearPartido(preliminares[i], preliminares[i + 1]));
+        }
+
+        // En la ronda 1 deben quedar exactamente baseEquipos participantes.
+        // Orden visual solicitado:
+        // 1) Arriba del todo: ganador preliminar vs ganador preliminar
+        // 2) Si sobra uno de preliminar: ganador preliminar vs directo
+        // 3) Después: directos entre sí
+        const placeholders = Array.from({ length: numPartidosPreliminar }, (_, prelimIndex) => ({
+            esPlaceholder: true,
+            prelimIndex
+        }));
+
         rondas["1"] = [];
-        for (let i = 0; i < parejasMezcladas.length; i += 2) {
-            if (i + 1 < parejasMezcladas.length) {
-                rondas["1"].push({
-                    p1: Number(parejasMezcladas[i]),
-                    p2: Number(parejasMezcladas[i + 1]),
-                    estado: "pendiente",
-                    ganador: null
-                });
-            } else {
-                // Si queda una pareja sin rival, pasa directamente
-                rondas["1"].push({
-                    p1: Number(parejasMezcladas[i]),
-                    p2: null,
-                    estado: "pendiente",
-                    ganador: null
-                });
+
+        let idxPlaceholder = 0;
+        let idxDirecto = 0;
+
+        const tomarPlaceholder = () => placeholders[idxPlaceholder++] || null;
+        const tomarDirecto = () => {
+            const valor = directos[idxDirecto++];
+            return Number.isInteger(valor) ? valor : null;
+        };
+
+        const crearPartidoRonda1 = (entrada1, entrada2) => {
+            const partidoIndex = rondas["1"].length;
+            const p1 = typeof entrada1 === 'number' ? entrada1 : null;
+            const p2 = typeof entrada2 === 'number' ? entrada2 : null;
+            rondas["1"].push(crearPartido(p1, p2));
+
+            if (entrada1 && typeof entrada1 === 'object' && entrada1.esPlaceholder) {
+                rondas["0"][entrada1.prelimIndex].destino = {
+                    ronda: "1",
+                    partido: partidoIndex,
+                    posicion: "p1"
+                };
             }
-        }
-        
-        // Crear el resto de rondas vacías (desde 2 hasta la final)
-        let rondaActual = 2;
-        let numPartidosRondaAnterior = rondas["1"].length;
-        
-        while (numPartidosRondaAnterior > 1) {
-            const numPartidosRondaActual = Math.ceil(numPartidosRondaAnterior / 2);
-            rondas[rondaActual] = [];
-            
-            for (let i = 0; i < numPartidosRondaActual; i++) {
-                rondas[rondaActual].push({
-                    p1: null,
-                    p2: null,
-                    estado: "pendiente",
-                    ganador: null
-                });
+
+            if (entrada2 && typeof entrada2 === 'object' && entrada2.esPlaceholder) {
+                rondas["0"][entrada2.prelimIndex].destino = {
+                    ronda: "1",
+                    partido: partidoIndex,
+                    posicion: "p2"
+                };
             }
-            
-            numPartidosRondaAnterior = numPartidosRondaActual;
-            rondaActual++;
+        };
+
+        // 1) Emparejar preliminares entre sí en la parte alta.
+        const partidosPreliminarEntreSi = Math.floor(numPartidosPreliminar / 2);
+        for (let i = 0; i < partidosPreliminarEntreSi; i++) {
+            crearPartidoRonda1(tomarPlaceholder(), tomarPlaceholder());
         }
-        
-        // Corregir para que la ronda final tenga solo 1 partido
-        if (rondas[rondaActual - 1] && rondas[rondaActual - 1].length > 1) {
-            rondas[rondaActual - 1] = [{
-                p1: null,
-                p2: null,
-                estado: "pendiente",
-                ganador: null
-            }];
+
+        // 2) Si sobra un ganador de preliminar, se cruza con un directo.
+        if (numPartidosPreliminar % 2 === 1) {
+            crearPartidoRonda1(tomarPlaceholder(), tomarDirecto());
         }
+
+        // 3) Completar con directos entre sí.
+        while (idxDirecto < directos.length) {
+            crearPartidoRonda1(tomarDirecto(), tomarDirecto());
+        }
+
+        // Seguridad: completar con partidos vacíos solo si hay algún desajuste.
+        const partidosEsperadosRonda1 = baseEquipos / 2;
+        while (rondas["1"].length < partidosEsperadosRonda1) {
+            crearPartidoRonda1(null, null);
+        }
+    }
+
+    // Crear rondas siguientes hasta dejar solo una final.
+    let rondaActual = 2;
+    let numPartidosRondaAnterior = rondas["1"].length;
+
+    while (numPartidosRondaAnterior > 1) {
+        const numPartidosRondaActual = Math.ceil(numPartidosRondaAnterior / 2);
+        rondas[String(rondaActual)] = [];
+
+        for (let i = 0; i < numPartidosRondaActual; i++) {
+            rondas[String(rondaActual)].push(crearPartido());
+        }
+
+        numPartidosRondaAnterior = numPartidosRondaActual;
+        rondaActual++;
+    }
+
+    // Añadir destino explícito para todos los partidos que no lo tengan.
+    const rondasOrdenadas = Object.keys(rondas).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    for (let i = 0; i < rondasOrdenadas.length - 1; i++) {
+        const ronda = rondasOrdenadas[i];
+        const siguienteRonda = rondasOrdenadas[i + 1];
+        const partidosRonda = rondas[ronda];
+        const partidosSiguiente = rondas[siguienteRonda];
+
+        partidosRonda.forEach((partido, index) => {
+            if (partido.destino) {
+                return;
+            }
+
+            const destinoPartido = Math.floor(index / 2);
+            if (!partidosSiguiente[destinoPartido]) {
+                return;
+            }
+
+            partido.destino = {
+                ronda: siguienteRonda,
+                partido: destinoPartido,
+                posicion: index % 2 === 1 ? 'p2' : 'p1'
+            };
+        });
     }
     
     console.log('Estructura final de rondas:', rondas);
@@ -743,46 +722,19 @@ function editarPartido(tipo, ronda, partidoIndex) {
                 ganador: ganadorValue
             };
             
+            const ganadorId = (ganadorValue && estadoValue === 'completado')
+                ? (ganadorValue === 'p1' ? p1Value : p2Value)
+                : null;
+
             // Guardar los datos actualizados
             database.ref(`campeonatos/datos/${tipo}/${ronda}/${partidoIndex}`).update(actualizaciones)
                 .then(() => {
                     // Cerrar el modal
                     document.body.removeChild(modalElement);
-                    
-                    // Actualizar los árboles si hay un ganador y el partido está completado
-                    if (ganadorValue && estadoValue === 'completado') {
-                        // Obtener el número de la pareja ganadora
-                        const ganadorId = ganadorValue === 'p1' ? p1Value : p2Value;
-                        
-                        // Verificar si hay ronda siguiente para actualizar
-                        database.ref(`campeonatos/datos/${tipo}`).once('value')
-                            .then(snapshot => {
-                                const campeonato = snapshot.val();
-                                const siguienteRonda = String(parseInt(ronda) + 1);
-                                
-                                if (campeonato[siguienteRonda]) {
-                                    // Calcular índice del partido en la siguiente ronda
-                                    const siguientePartidoIndex = Math.floor(partidoIndex / 2);
-                                    
-                                    // Determinar si es la primera o segunda pareja del siguiente partido
-                                    const esSegundaPareja = partidoIndex % 2 === 1;
-                                    
-                                    // Actualizar el partido correspondiente en la siguiente ronda
-                                    database.ref(`campeonatos/datos/${tipo}/${siguienteRonda}/${siguientePartidoIndex}`)
-                                        .update({
-                                            [esSegundaPareja ? 'p2' : 'p1']: ganadorId
-                                        })
-                                        .then(() => {
-                                            console.log(`Pareja #${ganadorId} avanzada a la siguiente ronda como ${esSegundaPareja ? 'p2' : 'p1'}`);
-                                        })
-                                        .catch(error => {
-                                            console.error('Error al actualizar la siguiente ronda:', error);
-                                            mostrarError('Error al actualizar la siguiente ronda: ' + error.message);
-                                        });
-                                }
-                            });
-                    }
-                    
+
+                    return sincronizarSiguienteRonda(tipo, ronda, partidoIndex, ganadorId);
+                })
+                .then(() => {
                     // Recargar los datos
                     database.ref('campeonatos').once('value')
                         .then(snapshot => {
@@ -807,26 +759,102 @@ function editarPartido(tipo, ronda, partidoIndex) {
 }
 
 /**
+ * Obtiene la casilla exacta de la siguiente ronda que depende de un partido.
+ */
+function obtenerDestinoSiguienteRonda(campeonato, rondaActual, partidoIndex) {
+    const partidoNum = parseInt(partidoIndex, 10);
+    const rondaNum = parseInt(rondaActual, 10);
+    const rondaPartidos = campeonato[String(rondaActual)];
+    const partidoActual = Array.isArray(rondaPartidos) ? rondaPartidos[partidoNum] : null;
+
+    if (partidoActual && partidoActual.destino) {
+        const destino = partidoActual.destino;
+        const destinoRonda = String(destino.ronda);
+        const destinoPartido = parseInt(destino.partido, 10);
+        const destinoPosicion = destino.posicion === 'p2' ? 'p2' : 'p1';
+        const rondaDestinoPartidos = campeonato[destinoRonda];
+
+        if (Array.isArray(rondaDestinoPartidos) && rondaDestinoPartidos[destinoPartido]) {
+            return {
+                ronda: destinoRonda,
+                partidoIndex: destinoPartido,
+                posicion: destinoPosicion
+            };
+        }
+    }
+
+    const siguienteRonda = String(rondaNum + 1);
+    const rondaSiguientePartidos = campeonato[siguienteRonda];
+
+    if (!Array.isArray(rondaSiguientePartidos) || rondaSiguientePartidos.length === 0) {
+        return null;
+    }
+
+    // En ronda preliminar (0), cada partido alimenta p1 del partido equivalente en ronda 1.
+    if (rondaNum === 0 && partidoNum < rondaSiguientePartidos.length) {
+        return {
+            ronda: siguienteRonda,
+            partidoIndex: partidoNum,
+            posicion: 'p1'
+        };
+    }
+
+    const siguientePartidoIndex = Math.floor(partidoNum / 2);
+    if (!rondaSiguientePartidos[siguientePartidoIndex]) {
+        return null;
+    }
+
+    return {
+        ronda: siguienteRonda,
+        partidoIndex: siguientePartidoIndex,
+        posicion: partidoNum % 2 === 1 ? 'p2' : 'p1'
+    };
+}
+
+/**
+ * Sincroniza el avance del ganador (o limpia casilla) en la siguiente ronda.
+ */
+function sincronizarSiguienteRonda(tipo, rondaActual, partidoIndex, ganadorId) {
+    return database.ref(`campeonatos/datos/${tipo}`).once('value')
+        .then(snapshot => {
+            const campeonato = snapshot.val() || {};
+            const destino = obtenerDestinoSiguienteRonda(campeonato, rondaActual, partidoIndex);
+
+            if (!destino) {
+                return null;
+            }
+
+            const valor = Number.isInteger(ganadorId) ? ganadorId : null;
+
+            return database.ref(`campeonatos/datos/${tipo}/${destino.ronda}/${destino.partidoIndex}`)
+                .update({ [destino.posicion]: valor })
+                .then(() => {
+                    if (valor === null) {
+                        console.log(`Casilla ${destino.posicion} de ronda ${destino.ronda}, partido ${destino.partidoIndex} limpiada`);
+                    } else {
+                        console.log(`Pareja #${valor} avanzada a ronda ${destino.ronda}, partido ${destino.partidoIndex}, ${destino.posicion}`);
+                    }
+                });
+        });
+}
+
+/**
  * Actualiza la siguiente ronda después de completar un partido
  */
 function actualizarSiguienteRonda(tipo, rondaActual, partidoIndex) {
     database.ref(`campeonatos/datos/${tipo}`).once('value')
         .then(snapshot => {
-            const campeonato = snapshot.val();
-            const partido = campeonato[rondaActual][partidoIndex];
-            const siguienteRonda = parseInt(rondaActual) + 1;
-            
-            if (!campeonato[siguienteRonda] || !partido.ganador) return;
-            
-            const ganadorId = partido.ganador === 'p1' ? partido.p1 : partido.p2;
-            if (ganadorId === null) return;
-            
-            const siguientePartidoIndex = Math.floor(partidoIndex / 2);
-            const esSegundaPareja = partidoIndex % 2 === 1;
-            
-            return database.ref(`campeonatos/datos/${tipo}/${siguienteRonda}/${siguientePartidoIndex}`).update({
-                [esSegundaPareja ? 'p2' : 'p1']: parseInt(ganadorId)
-            });
+            const campeonato = snapshot.val() || {};
+            const rondaPartidos = campeonato[rondaActual];
+
+            if (!Array.isArray(rondaPartidos)) return null;
+
+            const partido = rondaPartidos[partidoIndex];
+
+            if (!partido) return null;
+
+            const ganadorId = partido.ganador ? (partido.ganador === 'p1' ? partido.p1 : partido.p2) : null;
+            return sincronizarSiguienteRonda(tipo, rondaActual, partidoIndex, ganadorId);
         })
         .then(() => {
             console.log('Siguiente ronda actualizada correctamente');
