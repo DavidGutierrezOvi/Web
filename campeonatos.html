@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campeonatos - Peña El Cuervo</title>
+    <link rel="icon" href="img/ICONOPAGINAWEB.png" t ype="image/png">
+<link rel="apple-touch-icon" href="img/ICONOPAGINAWEB.png">
+    <meta name="theme-color" content="#6a0dad">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #6a1b9a 0%, #4a148c 100%);
+            padding: 30px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .page-header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 10px 0 0;
+            font-size: 1.2rem;
+        }
+
+        .campeonato-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .campeonato-tab {
+            padding: 10px 20px;
+            margin: 0 5px;
+            background-color: #f0f0f0;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .campeonato-tab.active {
+            background-color: #6a1b9a;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f5f0ff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .search-container input {
+            padding: 8px 15px;
+            width: 100px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .search-container button {
+            padding: 8px 15px;
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .search-result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .tournament-bracket {
+            display: flex;
+            flex-direction: column;
+            margin: 20px 0;
+        }
+
+        .round {
+            display: flex;
+            width: 100%;
+        }
+
+        .round-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #6a1b9a;
+        }
+
+        .match-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 10px;
+        }
+
+        .match {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 5px 10px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .match.pending {
+            background-color: #f9f9f9;
+        }
+
+        .match.active {
+            background-color: #ffe0b2;
+            border: 1px solid #ffb74d;
+        }
+
+        .match.completed {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+        }
+
+        .match-teams {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .team {
+            padding: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .team.winner {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .team-number {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .team-names {
+            flex-grow: 1;
+        }
+
+        .match-status {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .status-pending {
+            background-color: #f5f5f5;
+            color: #757575;
+        }
+
+        .status-active {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #8e24aa;
+        }
+        
+        .btn-warning {
+            background-color: #ff9800;
+        }
+        
+        .btn-warning:hover {
+            background-color: #ffb74d;
+        }
+        
+        .btn i {
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .round {
+                flex-direction: column;
+            }
+            
+            .match {
+                margin: 5px 0;
+            }
+            
+            .campeonato-tabs {
+                display: flex;
+                overflow-x: auto;
+                white-space: nowrap;
+                margin-bottom: 15px;
+                padding-bottom: 5px;
+            }
+            
+            .campeonato-tab {
+                padding: 8px 15px;
+                font-size: 0.95rem;
+                flex-shrink: 0;
+            }
+            
+            .search-container {
+                padding: 10px;
+            }
+            
+            .search-container input {
+                width: 80px;
+                margin-bottom: 10px;
+            }
+            
+            .search-container select, 
+            .search-container input, 
+            .search-container button {
+                display: block;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .tournament-bracket {
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header y navegación -->
+    <header>
+        <div class="logo-container">
+            <img src="img/Logo quitar fondo-Photoroom.png" alt="Logo Peña El Cuervo" class="logo-img">
+            <h1><span class="nombre-pena"> Peña El Cuervo</span></h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="fiestas.html">Fiestas</a></li>
+                <li><a href="fiestas-anteriores.html">Fiestas Anteriores</a></li>
+                <li><a href="dibujos.html">Dibujos Infantiles</a></li>
+                <li><a href="campeonatos.html" class="active">Campeonatos</a></li>
+            </ul>
+        </nav>
+        <div class="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+    </header>
+
+    <!-- Encabezado de página -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Campeonatos</h1>
+            <p>Mus, Tute y Parchís</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Buscador de parejas -->
+        <div class="search-container">
+            <h3>Busca tu próximo partido</h3>
+            <p>Introduce tu número de pareja para saber contra quién juegas</p>
+            <div>
+                <select id="campeonato-selector">
+                    <option value="mus">Mus</option>
+                    <option value="tute">Tute</option>
+                    <option value="parchis">Parchís</option>
+                </select>
+                <input type="number" id="pareja-numero" placeholder="Nº pareja" min="1">
+                <button id="buscar-pareja">Buscar</button>
+            </div>
+            <div id="search-result" class="search-result"></div>
+        </div>
+
+        <!-- Pestañas de campeonatos -->
+        <div class="campeonato-tabs">
+            <div class="campeonato-tab active" data-tab="mus">Mus</div>
+            <div class="campeonato-tab" data-tab="tute">Tute</div>
+            <div class="campeonato-tab" data-tab="parchis">Parchís</div>
+        </div>
+
+        <!-- Contenido de pestañas -->
+        <div id="mus-tab" class="tab-content active">
+            <div id="mus-bracket" class="tournament-bracket">
+                <!-- Se cargará dinámicamente -->
+                <div class="loading-container" style="text-align: center; padding: 50px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #6a1b9a;"></i>
+                    <p>Cargando campeonato de Mus...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="tute-tab" class="tab-content">
+            <div id="tute-bracket" class="tournament-bracket">
+                <!-- Se cargará dinámicamente -->
+                <div class="loading-container" style="text-align: center; padding: 50px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #6a1b9a;"></i>
+                    <p>Cargando campeonato de Tute...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="parchis-tab" class="tab-content">
+            <div id="parchis-bracket" class="tournament-bracket">
+                <!-- Se cargará dinámicamente -->
+                <div class="loading-container" style="text-align: center; padding: 50px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #6a1b9a;"></i>
+                    <p>Cargando campeonato de Parchís...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Peña El Cuervo</h3>
+                    <p>Tu lugar de encuentro para celebrar, compartir y disfrutar</p>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/pena.cuervo/" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/p_el_cuervo_navacepe?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Peña El Cuervo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <!-- Biblioteca Excel (SheetJS) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Configuración de Firebase -->
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA__5cfEqA4P4WV58TwG_RI4Y2khYe8DW4",
+            authDomain: "pena-el-cuervo.firebaseapp.com",
+            databaseURL: "https://pena-el-cuervo-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pena-el-cuervo",
+            storageBucket: "pena-el-cuervo.firebasestorage.app",
+            messagingSenderId: "607425328497",
+            appId: "1:607425328497:web:7b32973130881c335ff2d0",
+            measurementId: "G-1QN2LVNB0W"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Referencia a la base de datos
+        const database = firebase.database();
+    </script>
+
+    <script src="js/campeonatos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
